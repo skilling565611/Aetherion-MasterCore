@@ -1,0 +1,6 @@
+.downloads/
+.python-installer/
+.python-runtime/
+.venv/
+__pycache__/
+*.pyc
