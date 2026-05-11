@@ -12,12 +12,12 @@
         <p class="npc-eyebrow">Arctic Prime / Perchance</p>
         <h1>NPC XML Preview</h1>
         <p>
-          This local preview reads the current NPC XML layout and shows the fields HTML can use.
+          This temporary preview reads the whole NPC XML file so HTML can see the current character layout while it is still evolving.
         </p>
       </section>
 
       <section class="npc-preview-actions" aria-label="NPC XML loader">
-        <button id="loadDefaultNpc" type="button">Load Test NPC</button>
+        <button id="loadDefaultNpc" type="button">Load Nyra NPC</button>
         <label class="npc-file-input">
           Open NPC XML
           <input id="openNpcXml" type="file" accept=".xml,text/xml">
@@ -25,7 +25,7 @@
       </section>
 
       <section id="npcStatus" class="npc-status" aria-live="polite">
-        Ready to load <code>../Test.npc.dev.xml</code>.
+        Ready to load <code>./Characters/Nyra_Vale.npc.dev.xml</code>.
       </section>
 
       <section id="npcPreview" class="npc-preview-output">
@@ -39,7 +39,7 @@
 
     <script src="./JS_Examples.js"></script>
     <script>
-      const defaultNpcUrl = "../Test.npc.dev.xml";
+      const defaultNpcUrl = "./Characters/Nyra_Vale.npc.dev.xml";
       const statusNode = document.querySelector("#npcStatus");
       const previewNode = document.querySelector("#npcPreview");
       const loadButton = document.querySelector("#loadDefaultNpc");
@@ -51,12 +51,12 @@
 
       loadButton.addEventListener("click", async () => {
         try {
-          setStatus("Loading ../Test.npc.dev.xml...");
+          setStatus("Loading ./Characters/Nyra_Vale.npc.dev.xml...");
           const npc = await loadAndRenderNpcPreview(defaultNpcUrl, previewNode);
-          setStatus(`Loaded ${formatNpcDisplayName(npc)} from ../Test.npc.dev.xml.`);
+          setStatus(`Loaded ${formatNpcDisplayName(npc)} from ./Characters/Nyra_Vale.npc.dev.xml.`);
         } catch (error) {
           setStatus(
-            "Browser could not load ../Test.npc.dev.xml directly. Use the file picker or serve the AI folder through a local static server."
+            "Browser could not load the NPC XML directly. Use the file picker or serve the AI folder through a local static server."
           );
           console.error(error);
         }

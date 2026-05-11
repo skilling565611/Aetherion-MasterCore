@@ -102,6 +102,24 @@ function parseNpcTemplateXml(xmlText) {
     firstName: getXmlAttribute(xmlDoc, "Template > core > Name > FirstName", "Name"),
     lastName: getXmlAttribute(xmlDoc, "Template > core > Name > LastName", "Name"),
     nickName: getXmlAttribute(xmlDoc, "Template > core > Name > NickName", "Name"),
+    xmlText,
+    sections: Array.from(xmlDoc.documentElement.children).map(xmlElementToPreviewData),
+  };
+}
+
+function xmlElementToPreviewData(element) {
+  const childElements = Array.from(element.children);
+  const ownText = Array.from(element.childNodes)
+    .filter((node) => node.nodeType === Node.TEXT_NODE)
+    .map((node) => node.textContent.trim())
+    .filter(Boolean)
+    .join("\n\n");
+
+  return {
+    tag: element.tagName,
+    attributes: Object.fromEntries(Array.from(element.attributes).map((item) => [item.name, item.value])),
+    text: ownText,
+    children: childElements.map(xmlElementToPreviewData),
   };
 }
 
@@ -131,8 +149,63 @@ function renderNpcPreview(npc, target) {
           <dd>${escapeHtml(npc.nickName || "Not set")}</dd>
         </div>
       </dl>
+      <div class="npc-section-list">
+        ${npc.sections.map(renderXmlSection).join("")}
+      </div>
+      <details class="npc-raw-xml">
+        <summary>Raw XML</summary>
+        <pre>${escapeHtml(npc.xmlText || "")}</pre>
+      </details>
     </article>
   `;
+}
+
+function renderXmlSection(section) {
+  const attributes = Object.entries(section.attributes);
+  const hasContent = attributes.length || section.text || section.children.length;
+
+  return `
+    <section class="npc-xml-section">
+      <h3>${escapeHtml(humanizeXmlTag(section.tag))}</h3>
+      ${
+        hasContent
+          ? `
+            ${attributes.length ? renderXmlAttributes(attributes) : ""}
+            ${section.text ? `<p class="npc-xml-text">${escapeHtml(section.text)}</p>` : ""}
+            ${
+              section.children.length
+                ? `<div class="npc-xml-children">${section.children.map(renderXmlSection).join("")}</div>`
+                : ""
+            }
+          `
+          : `<p class="npc-xml-empty">No values set.</p>`
+      }
+    </section>
+  `;
+}
+
+function renderXmlAttributes(attributes) {
+  return `
+    <dl class="npc-xml-attributes">
+      ${attributes
+        .map(
+          ([name, value]) => `
+            <div>
+              <dt>${escapeHtml(humanizeXmlTag(name))}</dt>
+              <dd>${escapeHtml(value || "Not set")}</dd>
+            </div>
+          `
+        )
+        .join("")}
+    </dl>
+  `;
+}
+
+function humanizeXmlTag(value) {
+  return String(value)
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .trim();
 }
 
 function escapeHtml(value) {

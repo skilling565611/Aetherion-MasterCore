@@ -212,6 +212,89 @@ body {
   overflow-wrap: anywhere;
 }
 
+.npc-section-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.npc-xml-section {
+  background: rgba(21, 24, 27, 0.72);
+  border: 1px solid #343b40;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.npc-xml-section h3 {
+  margin: 0 0 10px;
+  color: #f4f0e8;
+  font-size: 18px;
+  letter-spacing: 0;
+}
+
+.npc-xml-children {
+  display: grid;
+  gap: 10px;
+}
+
+.npc-xml-children .npc-xml-section {
+  background: #101820;
+}
+
+.npc-xml-attributes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.npc-xml-attributes div {
+  min-width: 0;
+}
+
+.npc-xml-attributes dt {
+  color: #9db5b0;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  text-transform: uppercase;
+}
+
+.npc-xml-attributes dd {
+  margin: 0;
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+
+.npc-xml-text,
+.npc-xml-empty {
+  margin: 0;
+  color: #dbe5e1;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.npc-raw-xml {
+  margin-top: 18px;
+}
+
+.npc-raw-xml summary {
+  cursor: pointer;
+  color: #20d6c7;
+  font-weight: 700;
+}
+
+.npc-raw-xml pre {
+  max-height: 420px;
+  overflow: auto;
+  background: #101820;
+  border: 1px solid #343b40;
+  border-radius: 8px;
+  color: #f4f0e8;
+  padding: 12px;
+  white-space: pre-wrap;
+}
+
 @media (max-width: 720px) {
   .npc-fields {
     grid-template-columns: 1fr;
