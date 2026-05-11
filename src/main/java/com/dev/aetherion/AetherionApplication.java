@@ -9,13 +9,15 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class AetherionApplication extends Application {
-    private static final int MIN_WIDTH = 1180;
-    private static final int MIN_HEIGHT = 720;
+    private static final int MIN_WIDTH = 980;
+    private static final int MIN_HEIGHT = 600;
+    private static final int DEFAULT_WIDTH = 1040;
+    private static final int DEFAULT_HEIGHT = 640;
 
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader loader = new FXMLLoader(AetherionApplication.class.getResource("views/Aetherion.fxml"));
-        Scene scene = new Scene(loader.load(), 1320, 820);
+        Scene scene = new Scene(loader.load(), DEFAULT_WIDTH, DEFAULT_HEIGHT);
         scene.getStylesheets().add(Objects.requireNonNull(
                 AetherionApplication.class.getResource("styles/Main.css")
         ).toExternalForm());

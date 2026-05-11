@@ -1,4 +1,28 @@
-Update.md
-Roadmap.md
-UI_LOCK.md
-Device_Targets.md
+Arctic Prime Quick Fix Update
+
+Correction:
+The current application window is TOO LARGE for the display.
+
+Current size is approximately:
+
+- Width: 1180
+- Height: 720
+
+Reduce the default application size slightly so the dashboard fits comfortably on the current TV/monitor without compression or cutoff.
+
+Goals:
+
+- slightly smaller window
+- cleaner fit
+- reduce oversized scaling
+- preserve readability
+- preserve current layout
+- preserve current styling
+
+Suggested target range:
+
+- Width: around 980–1050
+- Height: around 600–650
+
+Do NOT redesign anything.
+Only adjust application sizing and fitting behavior.
