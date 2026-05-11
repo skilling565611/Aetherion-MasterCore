@@ -30,3 +30,4 @@ res/Exe/output/
 res/Exe/generated/
 res/Exe/*.exe
 res/Exe/*.msi
+PIX/Pix.dev
