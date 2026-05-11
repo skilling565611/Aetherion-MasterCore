@@ -24,3 +24,41 @@ Tasks:
 
 Goal:
 Safely stabilize and sync the restored PIX state between Arctic Prime and Control Prime.
+Control Prime:
+
+Important new rule:
+
+Do NOT automatically push changes to GitHub unless explicitly approved first.
+
+This includes:
+
+- EXE packaging changes
+- build output
+- installer output
+- temporary fixes
+- generated files
+- experimental changes
+- recovery operations
+
+Before ANY push:
+
+1. Stop
+2. Verify changes
+3. Wait for approval
+
+Allowed automatically:
+
+- local verification
+- local builds
+- local EXE testing
+- local fixes
+- local recovery work
+
+Not allowed automatically:
+
+- git push
+- sync publish
+- overwrite remote state
+- force push
+
+GitHub pushes must now be manual approval only.
