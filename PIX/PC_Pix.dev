@@ -1,0 +1,67 @@
+Control Prime Display/UI Cleanup Task
+
+The app is working, but some UI sizing and display areas need refinement for readability and layout stability.
+
+PIX handling:
+Read the PIX files as project instructions and context.
+Do NOT delete, remove, rename, empty, or replace any PIX files.
+Keep the PIX folder intact.
+Only make code or UI changes that follow these notes.
+
+Important:
+Do NOT redesign Aetherion.
+Do NOT replace the approved UI style.
+Do NOT move the major shell layout.
+
+Preserve:
+
+- current theme/colors
+- Main.css identity
+- top bar
+- sidebar
+- center workspace
+- right rail
+- overall cyber/offline-AI aesthetic
+
+Current goal:
+Improve display readability and layout fitting on Control Prime.
+
+Focus on:
+
+- spacing cleanup
+- text readability
+- panel sizing
+- better alignment
+- reducing cramped areas
+- moving content slightly downward where needed
+- preventing overlap
+- cleaner ScrollPane behavior
+- responsive fitting
+- dashboard readability
+- cleaner metric card sizing
+- proper VBox/HBox grow behavior
+- proper GridPane spacing
+- fitToWidth / fitToHeight cleanup
+- right rail readability
+- tab sizing cleanup
+- list/text area visibility improvements
+
+Allowed:
+
+- small CSS refinements
+- padding adjustments
+- spacing adjustments
+- prefWidth/prefHeight cleanup
+- Insets cleanup
+- responsive sizing improvements
+
+Do NOT:
+
+- massively alter layout
+- replace the shell
+- change the color identity
+- rebuild the dashboard
+- redesign sections
+
+Goal:
+Make Aetherion easier to read, cleaner to view, and more stable visually while preserving the approved style and architecture.
