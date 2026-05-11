@@ -17,12 +17,18 @@ V1.0 foundation:
 
 From IntelliJ, import the project as a Gradle project and run:
 
-`com.dev.aetherion.AetherionApplication`
+`Aetherion MasterCore` from the Run Configurations menu.
+
+If you create a plain Java run configuration, use:
+
+`com.dev.aetherion.AetherionLauncher`
+
+Do not run `AetherionApplication` directly from IntelliJ. It extends `javafx.application.Application`, and direct Java launches can fail if IntelliJ does not add the JavaFX runtime modules.
 
 From a terminal:
 
 ```powershell
-gradle run
+.\gradlew.bat run
 ```
 
 ## Project Layout

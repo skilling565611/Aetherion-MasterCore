@@ -13,7 +13,7 @@ java {
 }
 
 application {
-    mainClass = 'com.dev.aetherion.AetherionApplication'
+    mainClass = 'com.dev.aetherion.AetherionLauncher'
 }
 
 javafx {
