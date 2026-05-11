@@ -1,44 +1,4 @@
-AETHERION MASTERCORE — ARCTIC PRIME / LAPTOP CODEX PROMPT
-
-Device Role:
-Arctic Prime is the lightweight laptop/dev companion.
-
-Important:
-Do NOT perform large project rewrites on this machine.
-Do NOT do heavy builds unless explicitly requested.
-Do NOT restructure the full project.
-
-Allowed Work:
-
-- small CSS edits
-- small FXML adjustments
-- documentation edits
-- README updates
-- notes cleanup
-- small UI text edits
-- small config edits
-- GitHub pull/push checks
-- lightweight inspection
-- simple bug notes
-
-Not Allowed:
-
-- full rebuilds
-- major refactors
-- large dependency changes
-- heavy AI/model setup
-- major UI redesign
-- big architecture changes
-- EXE packaging unless explicitly requested
-
-Purpose:
-Use Arctic Prime for quick edits, review, notes, and lightweight testing only.
-
-Preserve:
-
-- current UI identity
-- Main.css theme
-- project structure
-- GitHub-safe files
-
-If a task is too heavy, mark it for Control Prime.
+Update.md
+Roadmap.md
+UI_LOCK.md
+Device_Targets.md
