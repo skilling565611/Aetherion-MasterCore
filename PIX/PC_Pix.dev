@@ -8,6 +8,15 @@ Do NOT delete, remove, rename, empty, or replace any PIX files.
 Keep the PIX folder intact.
 Only make code or UI changes that follow these notes.
 
+Git identity note:
+Arctic Prime uses the same GitHub account and email, but its local Git display name is:
+git config --global user.name "Arctic Prime"
+
+Control Prime should use the same GitHub account and email, but set its local Git display name to:
+git config --global user.name "Control Prime"
+
+Do NOT modify user.email, GitHub login, authentication, or remote URLs for this naming structure.
+
 Important:
 Do NOT redesign Aetherion.
 Do NOT replace the approved UI style.

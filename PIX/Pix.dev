@@ -1,28 +1,25 @@
-Arctic Prime Quick Fix Update
+Arctic Prime:
 
-Correction:
-The current application window is TOO LARGE for the display.
+Keep the current GitHub email exactly the same.
 
-Current size is approximately:
+Only change the Git commit display name for this system.
 
-- Width: 1180
-- Height: 720
+Set:
+git config --global user.name "Arctic Prime"
 
-Reduce the default application size slightly so the dashboard fits comfortably on the current TV/monitor without compression or cutoff.
+Do NOT modify:
 
-Goals:
+- user.email
+- GitHub login
+- authentication
+- remote URLs
 
-- slightly smaller window
-- cleaner fit
-- reduce oversized scaling
-- preserve readability
-- preserve current layout
-- preserve current styling
+After changing the local Git display name:
 
-Suggested target range:
+1. verify it worked
+2. notify Control Prime of the naming structure
+3. Control Prime should later use:
+   git config --global user.name "Control Prime"
 
-- Width: around 980–1050
-- Height: around 600–650
-
-Do NOT redesign anything.
-Only adjust application sizing and fitting behavior.
+Goal:
+Both systems keep the same GitHub account/email but have different visible commit names for tracking and recovery purposes.
