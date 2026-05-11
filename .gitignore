@@ -4,6 +4,8 @@ Thumbs.db
 Desktop.ini
 
 # Editor and IDE local state
+.idea/
+*.iml
 .vscode/
 *.swp
 *.swo
@@ -12,10 +14,19 @@ Desktop.ini
 *.log
 *.tmp
 *.temp
+*.bak
+*.cache
 
 # Common build output
+.gradle/
 build/
 dist/
 out/
 bin/
 obj/
+
+# Generated desktop package output
+res/Exe/output/
+res/Exe/generated/
+res/Exe/*.exe
+res/Exe/*.msi
