@@ -1,0 +1,9 @@
+<Template>
+    <core>
+        <Name>
+            <FirstName Name=""/>
+            <LastName Name=""/>
+            <NickName Name=""/>
+        </Name>
+    </core>
+</Template>
