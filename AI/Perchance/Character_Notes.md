@@ -9,6 +9,7 @@ Use this file for planning, rough notes, test observations, and safe character i
 | Character | Status | File/Chat Link | Notes |
 | --- | --- | --- | --- |
 | [Name] | Draft | [Link or file] | [Short note] |
+| Nyra Vale | Draft | `AI/Perchance/Characters/Nyra_Vale.md` | Adult original cyberpunk VR performer and AI avatar model. XML companion file: `AI/Perchance/Characters/Nyra_Vale.npc.dev.xml`. |
 
 ## Safety Checklist
 
@@ -64,4 +65,3 @@ Unresolved events:
 | Date | Character | Change | Reason |
 | --- | --- | --- | --- |
 | [YYYY-MM-DD] | [Name] | [Change] | [Reason] |
-
