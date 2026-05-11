@@ -1,0 +1,219 @@
+/*
+  Perchance AI Character Chat style examples.
+
+  Workspace note:
+  - Arctic Prime only.
+  - Keep isolated from Control Prime unless explicitly transferred later.
+
+  Safety notes:
+  - Styling only.
+  - Avoid unsafe character generation.
+  - Avoid copyrighted character cloning.
+  - Underage NSFW content must never be generated.
+*/
+
+/* Readable text styling */
+.message {
+  box-sizing: border-box;
+  max-width: 74ch;
+  line-height: 1.55;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.message p {
+  margin: 0 0 0.75rem;
+}
+
+/* Dark mode example */
+body {
+  background: #121416;
+  color: #f4f0e8;
+}
+
+.message {
+  background: #202427;
+  border: 1px solid #343b40;
+  border-radius: 8px;
+  padding: 0.8rem 0.95rem;
+}
+
+.message.user {
+  background: #26313a;
+}
+
+.message.ai {
+  background: #232a27;
+}
+
+/* Cyber UI example */
+.cyber-chat .message {
+  background: #101820;
+  border: 1px solid #20d6c7;
+  box-shadow: 0 0 0 1px rgba(32, 214, 199, 0.14);
+}
+
+.cyber-chat .message.ai {
+  border-left: 4px solid #20d6c7;
+}
+
+.cyber-chat .message.user {
+  border-left: 4px solid #ffcc4d;
+}
+
+.cyber-chat .name {
+  color: #20d6c7;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+/* Colorful AI chat styling */
+.colorful-chat .message.ai {
+  background: linear-gradient(135deg, #203a43, #2c5364);
+  border: 1px solid #66d9e8;
+  color: #f8fbff;
+}
+
+.colorful-chat .message.user {
+  background: linear-gradient(135deg, #553c9a, #7c3aed);
+  border: 1px solid #c4b5fd;
+  color: #fff;
+}
+
+.colorful-chat .name {
+  font-weight: 700;
+}
+
+/* Compact mobile readability */
+@media (max-width: 640px) {
+  .message {
+    width: 100%;
+    max-width: none;
+    font-size: 15px;
+    padding: 0.7rem;
+  }
+}
+
+/* NPC XML preview page */
+.npc-preview-page {
+  min-height: 100vh;
+  margin: 0;
+  background: #15181b;
+  color: #f4f0e8;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.npc-preview-shell {
+  width: min(960px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0;
+}
+
+.npc-preview-header {
+  margin-bottom: 20px;
+}
+
+.npc-preview-header h1 {
+  margin: 0 0 8px;
+  font-size: 32px;
+  letter-spacing: 0;
+}
+
+.npc-preview-header p {
+  max-width: 68ch;
+  margin: 0;
+  line-height: 1.55;
+  color: #cbd5d1;
+}
+
+.npc-eyebrow {
+  margin: 0 0 8px;
+  color: #20d6c7;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.npc-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+.npc-preview-actions button,
+.npc-file-input {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  border: 1px solid #20d6c7;
+  border-radius: 8px;
+  background: #101820;
+  color: #f4f0e8;
+  padding: 0 14px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.npc-file-input input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.npc-status {
+  margin: 0 0 16px;
+  color: #cbd5d1;
+  line-height: 1.5;
+}
+
+.npc-card {
+  background: #202427;
+  border: 1px solid #343b40;
+  border-left: 4px solid #20d6c7;
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.npc-card h2 {
+  margin: 0 0 16px;
+  font-size: 24px;
+  letter-spacing: 0;
+}
+
+.npc-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.npc-fields div {
+  background: #15181b;
+  border: 1px solid #343b40;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.npc-fields dt {
+  color: #9db5b0;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+
+.npc-fields dd {
+  margin: 0;
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .npc-fields {
+    grid-template-columns: 1fr;
+  }
+}

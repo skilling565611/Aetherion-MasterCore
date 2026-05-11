@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Perchance NPC Preview</title>
+    <link rel="stylesheet" href="./CSS_Examples.css">
+  </head>
+  <body class="npc-preview-page">
+    <main class="npc-preview-shell">
+      <section class="npc-preview-header">
+        <p class="npc-eyebrow">Arctic Prime / Perchance</p>
+        <h1>NPC XML Preview</h1>
+        <p>
+          This local preview reads the current NPC XML layout and shows the fields HTML can use.
+        </p>
+      </section>
+
+      <section class="npc-preview-actions" aria-label="NPC XML loader">
+        <button id="loadDefaultNpc" type="button">Load Test NPC</button>
+        <label class="npc-file-input">
+          Open NPC XML
+          <input id="openNpcXml" type="file" accept=".xml,text/xml">
+        </label>
+      </section>
+
+      <section id="npcStatus" class="npc-status" aria-live="polite">
+        Ready to load <code>../Test.npc.dev.xml</code>.
+      </section>
+
+      <section id="npcPreview" class="npc-preview-output">
+        <article class="npc-card">
+          <p class="npc-eyebrow">NPC Template Preview</p>
+          <h2>Not Loaded</h2>
+          <p>Use the button or file picker to preview an NPC XML file.</p>
+        </article>
+      </section>
+    </main>
+
+    <script src="./JS_Examples.js"></script>
+    <script>
+      const defaultNpcUrl = "../Test.npc.dev.xml";
+      const statusNode = document.querySelector("#npcStatus");
+      const previewNode = document.querySelector("#npcPreview");
+      const loadButton = document.querySelector("#loadDefaultNpc");
+      const fileInput = document.querySelector("#openNpcXml");
+
+      function setStatus(message) {
+        statusNode.textContent = message;
+      }
+
+      loadButton.addEventListener("click", async () => {
+        try {
+          setStatus("Loading ../Test.npc.dev.xml...");
+          const npc = await loadAndRenderNpcPreview(defaultNpcUrl, previewNode);
+          setStatus(`Loaded ${formatNpcDisplayName(npc)} from ../Test.npc.dev.xml.`);
+        } catch (error) {
+          setStatus(
+            "Browser could not load ../Test.npc.dev.xml directly. Use the file picker or serve the AI folder through a local static server."
+          );
+          console.error(error);
+        }
+      });
+
+      fileInput.addEventListener("change", async () => {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+
+        try {
+          const xmlText = await file.text();
+          const npc = parseNpcTemplateXml(xmlText);
+          renderNpcPreview(npc, previewNode);
+          setStatus(`Loaded ${formatNpcDisplayName(npc)} from ${file.name}.`);
+        } catch (error) {
+          setStatus("Selected XML could not be parsed. Check the NPC layout.");
+          console.error(error);
+        }
+      });
+    </script>
+  </body>
+</html>
