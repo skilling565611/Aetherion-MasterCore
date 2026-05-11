@@ -1,64 +1,67 @@
-Create this file:
+Arctic Prime CSS Color Restore Task
 
-PIX/PIX_RULES.md
+Update "Main.css" to restore the colorful Aetherion cyber style, but do it carefully and only change colors/theme values.
 
-Purpose:
-This file contains the permanent rules for the PIX area. Both Arctic Prime and Control Prime must read this file before making changes involving PIX.
+Do NOT change:
 
-Rules:
+- layout
+- sizing
+- spacing
+- padding
+- widths/heights
+- FXML
+- Java files
+- project structure
 
-1. Do not delete PIX.
-2. Do not remove PIX files unless explicitly approved by the user.
-3. Do not rename PIX files unless explicitly approved.
-4. Do not overwrite PIX recovery files.
-5. Do not auto-clean PIX.
-6. Do not hard reset or force overwrite PIX.
-7. Do not push PIX changes to GitHub without approval.
-8. Before editing PIX, verify these files exist:
-   - PIX/PC_Pix.dev
-   - PIX/Pix.dev
-9. Arctic Prime may act as the recovery/verification copy.
-10. Control Prime may act as the main build/workstation copy.
-11. If PIX rules need changes, update PIX_RULES.md first.
-12. Always read PIX_RULES.md before touching anything inside PIX.
+Only adjust CSS colors, gradients, borders, glow, and readability.
 
-System names:
+Use this color direction:
 
-- Control Prime = Main PC / build workstation
-- Arctic Prime = Laptop / verification and recovery system
+- main background: very dark space blue / near black
+- panels: dark blue-black gradient
+- primary accent: cyan / teal
+- secondary accent: amber / orange
+- success accent: neon green
+- warning/error accent: red/pink
+- main text: soft cyan-white
+- muted text: blue-gray
+
+Suggested palette:
+
+- Background: "#05080f", "#0b1017", "#08111d"
+- Panel: "#10263d", "#08111d"
+- Cyan: "#00d9ff", "#00efd8"
+- Green: "#00ff95", "#23c698"
+- Amber: "#ff9f1c", "#ffcf66"
+- Red: "#ff4b5c", "#ffd6d6"
+- Text: "#d7f8ff"
+- Muted text: "#9fc2d6"
+
+Make these areas more colorful again:
+
+- ".app-root"
+- ".top-bar"
+- ".footer-bar"
+- ".sidebar"
+- ".right-rail"
+- ".section-header"
+- ".control-card"
+- ".ai-command-panel"
+- ".rail-panel"
+- ".primary-button"
+- ".danger-button"
+- ".nav-button"
+- ".status-pill-green"
+- ".status-pill-cyan"
+- ".status-pill-amber"
+- ".progress-bar .bar"
+- ".scroll-bar .thumb"
 
 Important:
-This file should only change when the user updates the PIX rules
-Update PIX_RULES.md with the following communication command structure.
+Keep text readable.
+No white JavaFX default boxes.
+No massive visual overhaul.
+No layout movement.
 
-Command Keywords:
-
-Control Prime:
-
-- "Good to go!"
-  Meaning:
-  Approved to safely push verified changes to GitHub.
-
-Arctic Prime:
-
-- "push"
-  Meaning:
-  Approved to safely push recovery/verification updates to GitHub.
-
-Both Systems:
-
-- "pull"
-  Meaning:
-  Approved to safely sync latest verified repository state.
-
-Important Rules:
-
-1. Commands must only execute after verification.
-2. No automatic push behavior.
-3. No force push unless explicitly approved.
-4. Read PIX_RULES.md before performing Git operations involving PIX.
-5. Arctic Prime may act as temporary recovery source-of-truth.
-6. Control Prime may act as main build/development source.
-
-Purpose:
-Reduce accidental sync conflicts and maintain stable coordination between Control Prime and Arctic Prime.
+Goal:
+Restore the Aetherion colorful cyber look while keeping the current structure stable.
