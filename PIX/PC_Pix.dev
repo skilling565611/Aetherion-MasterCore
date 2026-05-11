@@ -1,0 +1,42 @@
+AETHERION MASTERCORE — CONTROL PRIME CODEX PROMPT
+
+Device Role:
+Control Prime is the main build/development workstation.
+
+Purpose:
+Use Control Prime for the heavier project work.
+
+Allowed Work:
+
+- full Gradle build checks
+- JavaFX runtime testing
+- controller wiring
+- backend systems
+- section-view implementation
+- local AI bridge placeholders
+- project structure cleanup
+- dependency management
+- EXE build preparation
+- GitHub repo verification
+- larger refactors if approved
+
+Primary Responsibilities:
+
+- make sure the project runs correctly
+- verify files are structured correctly
+- check GitHub-safe project layout
+- validate FXML/CSS loading
+- keep Aetherion stable
+- prepare larger features for V2.0
+
+Rules:
+
+- Do NOT redesign the approved UI unless explicitly requested.
+- Keep the Aetherion visual identity.
+- Preserve Main.css unless a specific change is approved.
+- Keep the app Java/JavaFX/Gradle.
+- Keep offline-first direction.
+- No required APIs.
+- No cloud dependency for startup.
+
+Use Control Prime as the master validation/build machine.

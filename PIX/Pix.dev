@@ -1,355 +1,44 @@
-PROJECT NAME:
-Aetherion MasterCore
+AETHERION MASTERCORE — ARCTIC PRIME / LAPTOP CODEX PROMPT
 
-REPO NAME:
-Aetherion-MasterCore
+Device Role:
+Arctic Prime is the lightweight laptop/dev companion.
 
-PROJECT TYPE:
-Java / JavaFX / Gradle
+Important:
+Do NOT perform large project rewrites on this machine.
+Do NOT do heavy builds unless explicitly requested.
+Do NOT restructure the full project.
 
-MAIN GOAL:
-Build Aetherion MasterCore as the main Java-based master application. This replaces the earlier Python master-app idea. Aetherion MasterCore is a futuristic offline-first AI control hub, master dashboard, local utility system, and modular runtime environment.
+Allowed Work:
 
-IMPORTANT:
-Start from a clean GitHub repo.
-Assume no previous context.
-Everything important is written in this prompt.
+- small CSS edits
+- small FXML adjustments
+- documentation edits
+- README updates
+- notes cleanup
+- small UI text edits
+- small config edits
+- GitHub pull/push checks
+- lightweight inspection
+- simple bug notes
 
-DO NOT build this in Python.
-Use Java + JavaFX.
+Not Allowed:
 
-==================================================
-CORE IDENTITY
-==================================================
+- full rebuilds
+- major refactors
+- large dependency changes
+- heavy AI/model setup
+- major UI redesign
+- big architecture changes
+- EXE packaging unless explicitly requested
 
-Aetherion MasterCore is:
-- the master application
-- Java-based
-- Windows-first
-- offline-first
-- modular
-- expandable
-- designed for Control Prime and Arctic Prime
-- eventually able to manage local AI tools, character systems, profiles, utilities, and automation
+Purpose:
+Use Arctic Prime for quick edits, review, notes, and lightweight testing only.
 
-Visual style:
-- dark cyber/offline-AI dashboard
-- cyan/amber accents
-- rounded panels
-- gradient cards
-- sci-fi control hub feel
-- readable dark mode
-- no white text boxes
-- no bright default JavaFX styling
+Preserve:
 
-==================================================
-VERSION HISTORY / ROADMAP
-==================================================
-
-V1.0:
-- Clean JavaFX project setup
-- Main dashboard shell
-- top bar
-- left sidebar
-- center workspace
-- right rail/status panel
-- basic footer/status area if needed
+- current UI identity
 - Main.css theme
-- GitHub-safe structure
-- runs successfully from IntelliJ
+- project structure
+- GitHub-safe files
 
-V1.5:
-- UI refinement
-- dark mode cleanup
-- readable text everywhere
-- better CSS organization
-- tablet/foldable laptop support planned
-- floating keyboard support planned
-- easy CSS editing
-- documentation files
-- local EXE build support planned under res/Exe/
-
-V2.0:
-- section-specific mini UI views
-- Dashboard View
-- AI Core View
-- Systems View
-- Developer View
-- only center workspace changes per section
-- global shell remains locked
-- prepare local AI bridge placeholders
-- no required APIs
-- no cloud dependency
-
-==================================================
-DEVICE TARGETS
-==================================================
-
-Control Prime:
-- main PC
-- full master system
-- heavier processing allowed
-- local AI tools stored here
-- development/build machine
-- GitHub/Codex integration
-- full/dev mode
-
-Arctic Prime:
-- laptop
-- portable control hub
-- lightweight runtime
-- offline-first
-- low RAM/CPU usage
-- fast startup
-- tablet/foldable mode support
-- floating keyboard support
-- local tools only unless user enables more
-
-Do not force heavy systems on Arctic Prime.
-
-==================================================
-GITHUB / REPO RULES
-==================================================
-
-Create a clean GitHub-safe project.
-
-Include .gitignore for:
-- build/
-- out/
-- .gradle/
-- .idea/
-- *.iml
-- temp files
-- generated EXE output if needed
-
-Do not commit broken generated files.
-
-Recommended structure:
-
-src/main/java/com/dev/aetherion/
-src/main/java/com/dev/aetherion/ui/
-src/main/java/com/dev/aetherion/ui/dashboard/
-src/main/java/com/dev/aetherion/core/
-src/main/java/com/dev/aetherion/ai/
-src/main/java/com/dev/aetherion/systems/
-src/main/java/com/dev/aetherion/developer/
-src/main/java/com/dev/aetherion/utils/
-
-src/main/resources/com/dev/aetherion/
-src/main/resources/com/dev/aetherion/styles/
-src/main/resources/com/dev/aetherion/views/
-
-res/
-res/Docs/
-res/Exe/
-res/Config/
-res/Data/
-
-Required files:
-- build.gradle
-- settings.gradle
-- README.md
-- .gitignore
-- AetherionApplication.java
-- AetherionDashboardController.java
-- Aetherion.fxml
-- styles/Main.css
-- res/Docs/UI_LOCK.md
-- res/Docs/JavaFX_CSS_Notes.md
-- res/Docs/Roadmap.md
-- res/Docs/Device_Targets.md
-
-==================================================
-UI LOCK RULE
-==================================================
-
-After the main shell is created, treat it as protected.
-
-Do NOT redesign the entire UI unless the user explicitly requests it.
-
-Allowed:
-- functionality
-- backend logic
-- controller wiring
-- section content inside center workspace
-- bug fixes
-- small readability fixes
-- scroll fixes
-- responsiveness fixes
-
-Not allowed without explicit user approval:
-- changing global layout
-- moving sidebar
-- moving top bar
-- moving right rail
-- changing whole theme
-- replacing dashboard identity
-- major visual redesign
-
-==================================================
-MAIN UI SHELL
-==================================================
-
-Build the main UI shell with:
-
-Top Bar:
-- AETHERION MASTERCORE title
-- subtitle: Offline AI Control Hub
-- Local First status
-- Dev Mode status
-- Safe Mode status
-- Search field
-- Run Diagnostics button
-- Exit button
-
-Left Sidebar:
-Core:
-- Dashboard
-
-AI Core:
-- AI Core
-- Characters
-- Conversations
-- Memory
-
-Systems:
-- Automation
-- Scripts
-- Plugins
-- Database
-- Device Sync
-
-Developer:
-- Debug Console
-- Logs
-- Settings
-
-Center Workspace:
-- dashboard overview by default
-- metric cards
-- module lifecycle
-- system activity feed
-- AI interaction area
-- floating widgets placeholder
-
-Right Rail:
-- AI status panel
-- notifications
-- runtime statistics
-
-==================================================
-SECTION VIEWS FOR V2.0
-==================================================
-
-Only swap center workspace content.
-
-Dashboard View:
-- main overview/control dashboard
-
-AI Core View:
-- local AI status
-- model slot placeholder
-- image recognition placeholder
-- file analysis placeholder
-- character/profile tools
-- AI command queue
-- local-only processing status
-
-Systems View:
-- Arctic Prime mode
-- Control Prime mode
-- storage mode
-- sync status
-- performance controls
-- module controls
-
-Developer View:
-- debug console
-- runtime logs
-- build/export tools
-- EXE packaging placeholder
-- GitHub status
-- diagnostics
-- developer utilities
-
-==================================================
-LOCAL AI DIRECTION
-==================================================
-
-Do NOT use paid APIs.
-Do NOT require online APIs.
-Do NOT make internet required.
-
-AI should be prepared for:
-- local model runner connection later
-- LM Studio local server optional later
-- GGUF/ONNX paths later
-- offline image recognition later
-- local character/profile generation later
-- local file analysis later
-
-For now:
-- create LocalAIManager placeholder
-- create PromptRouter placeholder
-- create ModelConfig placeholder
-- create SafetyRules placeholder
-- create CharacterGenerator placeholder
-
-No heavy model bundling yet.
-
-==================================================
-CSS / THEME
-==================================================
-
-Use Main.css.
-
-Theme colors:
-- dark background: #0b1017 / #101418
-- panel dark blue: #10263d / #08111d
-- cyan accent: #00d9ff / #00efd8
-- green accent: #00ff95
-- amber accent: #ff9f1c
-- red warning: #ff4b5c
-- readable text: #d7f8ff
-- muted text: #9fc2d6
-
-Make sure:
-- all text is readable
-- no white default text boxes
-- no white default ListViews
-- no white TextAreas
-- no broken default JavaFX colors
-- dark mode is consistent
-
-==================================================
-BUILD / EXE PLAN
-==================================================
-
-Eventually support building a Windows EXE.
-
-For now:
-- prepare res/Exe/
-- add docs explaining future build/export
-- do not overcomplicate packaging yet
-
-==================================================
-FIRST TASK
-==================================================
-
-Create the clean JavaFX/Gradle project foundation.
-
-Then implement:
-1. AetherionApplication.java
-2. Aetherion.fxml
-3. AetherionDashboardController.java
-4. Main.css
-5. README.md
-6. .gitignore
-7. basic docs under res/Docs/
-
-The project must:
-- open in IntelliJ
-- run successfully
-- preserve the Aetherion visual identity
-- be GitHub-safe
-- be ready for V2.0 expansion
+If a task is too heavy, mark it for Control Prime.
