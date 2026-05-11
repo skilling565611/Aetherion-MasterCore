@@ -8,6 +8,9 @@ import com.dev.aetherion.ai.SafetyRules;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
@@ -145,16 +148,26 @@ public class AetherionDashboardController {
         return box;
     }
 
-    private VBox metricGrid() {
-        VBox box = new VBox(12);
-        box.getStyleClass().add("dashboard-grid");
-        box.getChildren().addAll(
-                statusCard("Core Runtime", "Online locally. Cloud services disabled.", "cyan"),
-                statusCard("Safe Mode", "Enabled. Protected offline-first operation.", "green"),
-                statusCard("Device Profile", "Control Prime development profile active.", "amber"),
-                statusCard("Module Slots", "12 registered placeholders for V2.0.", "cyan")
-        );
-        return box;
+    private GridPane metricGrid() {
+        GridPane grid = new GridPane();
+        grid.getStyleClass().add("dashboard-grid");
+        grid.setHgap(14);
+        grid.setVgap(14);
+        grid.setMaxWidth(Double.MAX_VALUE);
+
+        ColumnConstraints leftColumn = new ColumnConstraints();
+        leftColumn.setPercentWidth(50);
+        leftColumn.setHgrow(Priority.ALWAYS);
+        ColumnConstraints rightColumn = new ColumnConstraints();
+        rightColumn.setPercentWidth(50);
+        rightColumn.setHgrow(Priority.ALWAYS);
+        grid.getColumnConstraints().addAll(leftColumn, rightColumn);
+
+        grid.add(statusCard("Core Runtime", "Online locally. Cloud services disabled.", "cyan"), 0, 0);
+        grid.add(statusCard("Safe Mode", "Enabled. Protected offline-first operation.", "green"), 1, 0);
+        grid.add(statusCard("Device Profile", "Control Prime development profile active.", "amber"), 0, 1);
+        grid.add(statusCard("Module Slots", "12 registered placeholders for V2.0.", "cyan"), 1, 1);
+        return grid;
     }
 
     private VBox moduleLifecycle() {
@@ -179,12 +192,19 @@ public class AetherionDashboardController {
     private VBox statusCard(String title, String body, String accent) {
         Label titleLabel = new Label(title);
         titleLabel.getStyleClass().add("card-title");
+        titleLabel.setWrapText(true);
+        titleLabel.setMaxWidth(Double.MAX_VALUE);
         Label bodyLabel = new Label(body);
         bodyLabel.getStyleClass().add("card-body");
         bodyLabel.setWrapText(true);
+        bodyLabel.setMaxWidth(Double.MAX_VALUE);
 
         VBox card = new VBox(8, titleLabel, bodyLabel);
         card.getStyleClass().addAll("control-card", "accent-" + accent);
+        card.setMaxWidth(Double.MAX_VALUE);
+        card.setMinHeight(96);
+        GridPane.setHgrow(card, Priority.ALWAYS);
+        HBox.setHgrow(card, Priority.ALWAYS);
         VBox.setVgrow(card, Priority.NEVER);
         return card;
     }
