@@ -1,46 +1,61 @@
-Control Prime Codex Task:
+Control Prime Display/UI Cleanup Task
 
-We are now ready to properly set up and stabilize Aetherion MasterCore on the main workstation.
-
-This machine is the primary build/runtime/development system.
-
-Tasks:
-
-- properly set up Java
-- properly set up JavaFX
-- properly set up Gradle
-- verify IntelliJ project configuration
-- verify JavaFX runtime configuration
-- verify FXML loading
-- verify Main.css loading
-- verify controller connections
-- verify GitHub repo structure
-- verify project launches successfully
+The app is working, but some UI sizing and display areas need refinement for readability and layout stability.
 
 Important:
-Do NOT redesign the UI.
-Do NOT replace the current Aetherion visual identity.
-Do NOT restructure the approved shell layout.
+Do NOT redesign Aetherion.
+Do NOT replace the approved UI style.
+Do NOT move the major shell layout.
 
-Current priority:
+Preserve:
 
-- stability
-- correct setup
-- working runtime
-- clean Gradle configuration
-- correct JavaFX integration
-- GitHub-safe structure
-- proper project loading inside IntelliJ
+- current theme/colors
+- Main.css identity
+- top bar
+- sidebar
+- center workspace
+- right rail
+- overall cyber/offline-AI aesthetic
 
-Required:
+Current goal:
+Improve display readability and layout fitting on Control Prime.
 
-- configure JavaFX dependencies correctly
-- ensure Gradle can build/run the app
-- ensure IntelliJ recognizes JavaFX properly
-- ensure resources load correctly
-- ensure project can launch from Control Prime
+Focus on:
 
-Project type:
-Java + JavaFX + Gradle
+- spacing cleanup
+- text readability
+- panel sizing
+- better alignment
+- reducing cramped areas
+- moving content slightly downward where needed
+- preventing overlap
+- cleaner ScrollPane behavior
+- responsive fitting
+- dashboard readability
+- cleaner metric card sizing
+- proper VBox/HBox grow behavior
+- proper GridPane spacing
+- fitToWidth / fitToHeight cleanup
+- right rail readability
+- tab sizing cleanup
+- list/text area visibility improvements
 
-The project should launch successfully before further V2.0 work continues.
+Allowed:
+
+- small CSS refinements
+- padding adjustments
+- spacing adjustments
+- prefWidth/prefHeight cleanup
+- Insets cleanup
+- responsive sizing improvements
+
+Do NOT:
+
+- massively alter layout
+- replace the shell
+- change the color identity
+- rebuild the dashboard
+- redesign sections
+
+Goal:
+Make Aetherion easier to read, cleaner to view, and more stable visually while preserving the approved style and architecture.
