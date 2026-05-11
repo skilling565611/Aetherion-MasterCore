@@ -31,6 +31,24 @@ From a terminal:
 .\gradlew.bat run
 ```
 
+## Windows Packaging
+
+Build a runnable app image:
+
+```powershell
+.\gradlew.bat packageAppImage
+```
+
+The generated app folder is placed under `res/Exe/generated/`.
+
+Build a Windows installer EXE:
+
+```powershell
+.\gradlew.bat packageWindowsExe
+```
+
+Installer EXE packaging requires WiX Toolset on Windows. See `res/Docs/Exe_Build_Plan.md`.
+
 ## Project Layout
 
 ```text

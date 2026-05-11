@@ -24,3 +24,81 @@ javafx {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
+
+def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
+def jpackageExecutable = isWindows ? 'jpackage.exe' : 'jpackage'
+def jpackageInputDir = layout.buildDirectory.dir('jpackage/input')
+def appImageOutputDir = layout.projectDirectory.dir('res/Exe/generated')
+def installerOutputDir = layout.projectDirectory.dir('res/Exe/output')
+def packageName = 'AetherionMasterCore'
+def commandOnPath = { String commandName ->
+    def pathValue = System.getenv('PATH') ?: ''
+    pathValue.split(File.pathSeparator).any { pathEntry ->
+        new File(pathEntry, commandName).isFile()
+    }
+}
+
+tasks.register('prepareJpackageInput', Copy) {
+    group = 'distribution'
+    description = 'Collects the app jar and runtime dependencies for jpackage.'
+    dependsOn(tasks.named('jar'))
+    from(tasks.named('jar'))
+    from(configurations.runtimeClasspath)
+    into(jpackageInputDir)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.register('packageAppImage', Exec) {
+    group = 'distribution'
+    description = 'Builds a runnable Windows app image under res/Exe/generated/.'
+    dependsOn(tasks.named('prepareJpackageInput'))
+
+    doFirst {
+        delete(appImageOutputDir.dir(packageName))
+        appImageOutputDir.asFile.mkdirs()
+    }
+
+    commandLine(
+            jpackageExecutable,
+            '--type', 'app-image',
+            '--dest', appImageOutputDir.asFile.absolutePath,
+            '--input', jpackageInputDir.get().asFile.absolutePath,
+            '--name', packageName,
+            '--main-jar', "${project.name}-${project.version}.jar",
+            '--main-class', application.mainClass.get(),
+            '--app-version', project.version.toString(),
+            '--vendor', 'Aetherion'
+    )
+}
+
+tasks.register('packageWindowsExe', Exec) {
+    group = 'distribution'
+    description = 'Builds a Windows .exe installer under res/Exe/output/ when WiX Toolset is installed.'
+    dependsOn(tasks.named('prepareJpackageInput'))
+
+    doFirst {
+        if (!isWindows) {
+            throw new GradleException('packageWindowsExe is only available on Windows.')
+        }
+
+        if (!commandOnPath('candle.exe') || !commandOnPath('light.exe')) {
+            throw new GradleException('WiX Toolset is required for jpackage --type exe. Install WiX 3.x or add candle.exe and light.exe to PATH, then rerun .\\gradlew.bat packageWindowsExe.')
+        }
+        installerOutputDir.asFile.mkdirs()
+    }
+
+    commandLine(
+            jpackageExecutable,
+            '--type', 'exe',
+            '--dest', installerOutputDir.asFile.absolutePath,
+            '--input', jpackageInputDir.get().asFile.absolutePath,
+            '--name', packageName,
+            '--main-jar', "${project.name}-${project.version}.jar",
+            '--main-class', application.mainClass.get(),
+            '--app-version', project.version.toString(),
+            '--vendor', 'Aetherion',
+            '--win-dir-chooser',
+            '--win-menu',
+            '--win-shortcut'
+    )
+}
