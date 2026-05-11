@@ -60,5 +60,5 @@ Not allowed automatically:
 - sync publish
 - overwrite remote state
 - force push
-
+git config --global user.name "Control Prime"
 GitHub pushes must now be manual approval only.
