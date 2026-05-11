@@ -1,125 +1,168 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ColorPicker?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.web.WebView?>
 
-<BorderPane fx:id="rootShell" prefHeight="820.0" prefWidth="1320.0" styleClass="app-root"
-            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.dev.aetherion.ui.dashboard.AetherionDashboardController">
-    <top>
-        <HBox alignment="CENTER_LEFT" spacing="14.0" styleClass="top-bar">
-            <padding>
-                <Insets bottom="14.0" left="18.0" right="18.0" top="14.0"/>
-            </padding>
-            <VBox spacing="2.0">
-                <Label text="AETHERION MASTERCORE" styleClass="app-title"/>
-                <Label text="Offline AI Control Hub" styleClass="app-subtitle"/>
-            </VBox>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Label text="Local First" styleClass="status-pill-green"/>
-            <Label text="Dev Mode" styleClass="status-pill-cyan"/>
-            <Label text="Safe Mode" styleClass="status-pill-amber"/>
-            <TextField promptText="Search local systems" styleClass="search-field"/>
-            <Button text="Run Diagnostics" onAction="#runDiagnostics" styleClass="primary-button"/>
-            <Button text="Exit" onAction="#exitApplication" styleClass="danger-button"/>
-        </HBox>
-    </top>
 
-    <left>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="sidebar-scroll">
-            <VBox spacing="10.0" styleClass="sidebar">
-                <padding>
-                    <Insets bottom="16.0" left="14.0" right="14.0" top="16.0"/>
-                </padding>
-                <Label text="Core" styleClass="nav-heading"/>
-                <Button text="Dashboard" onAction="#showDashboard" maxWidth="Infinity" styleClass="nav-button"/>
-
-                <Separator/>
-                <Label text="AI Core" styleClass="nav-heading"/>
-                <Button text="AI Core" onAction="#showAiCore" maxWidth="Infinity" styleClass="nav-button"/>
-                <Button text="Characters" onAction="#showPlaceholder" maxWidth="Infinity" styleClass="nav-button"/>
-                <Button text="Conversations" onAction="#showPlaceholder" maxWidth="Infinity" styleClass="nav-button"/>
-                <Button text="Memory" onAction="#showPlaceholder" maxWidth="Infinity" styleClass="nav-button"/>
-
-                <Separator/>
-                <Label text="Systems" styleClass="nav-heading"/>
-                <Button text="Automation" onAction="#showSystems" maxWidth="Infinity" styleClass="nav-button"/>
-                <Button text="Scripts" onAction="#showPlaceholder" maxWidth="Infinity" styleClass="nav-button"/>
-                <Button text="Plugins" onAction="#showPlaceholder" maxWidth="Infinity" styleClass="nav-button"/>
-                <Button text="Database" onAction="#showPlaceholder" maxWidth="Infinity" styleClass="nav-button"/>
-                <Button text="Device Sync" onAction="#showSystems" maxWidth="Infinity" styleClass="nav-button"/>
-
-                <Separator/>
-                <Label text="Developer" styleClass="nav-heading"/>
-                <Button text="Debug Console" onAction="#showDeveloper" maxWidth="Infinity" styleClass="nav-button"/>
-                <Button text="Logs" onAction="#showDeveloper" maxWidth="Infinity" styleClass="nav-button"/>
-                <Button text="Settings" onAction="#showPlaceholder" maxWidth="Infinity" styleClass="nav-button"/>
-            </VBox>
-        </ScrollPane>
-    </left>
-
-    <center>
-        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="workspace-scroll">
-            <VBox spacing="14.0" styleClass="workspace">
-                <padding>
-                    <Insets bottom="18.0" left="18.0" right="18.0" top="18.0"/>
-                </padding>
-                <HBox alignment="CENTER_LEFT" spacing="10.0">
-                    <Label text="Active View:" styleClass="muted-label"/>
-                    <Label fx:id="activeViewLabel" text="Dashboard" styleClass="active-view-label"/>
-                </HBox>
-                <VBox fx:id="centerWorkspace" spacing="14.0"/>
-                <VBox spacing="8.0" styleClass="ai-command-panel">
-                    <Label text="Local AI Command" styleClass="card-title"/>
-                    <TextArea fx:id="aiCommandInput" prefRowCount="4" promptText="Enter a local command for future offline routing." wrapText="true"/>
-                    <Button text="Queue Local Command" onAction="#sendAiCommand" styleClass="primary-button"/>
-                </VBox>
-            </VBox>
-        </ScrollPane>
-    </center>
-
-    <right>
-        <VBox spacing="14.0" styleClass="right-rail">
-            <padding>
-                <Insets bottom="16.0" left="14.0" right="14.0" top="16.0"/>
-            </padding>
-            <VBox spacing="8.0" styleClass="rail-panel">
-                <Label text="AI Status" styleClass="rail-title"/>
-                <Label fx:id="localAiStatus" text="AI Status: offline standby" wrapText="true" styleClass="rail-body"/>
-                <Label text="No cloud API required" styleClass="status-line-green"/>
-            </VBox>
-            <VBox spacing="8.0" styleClass="rail-panel">
-                <Label text="Notifications" styleClass="rail-title"/>
-                <Label text="Shell locked for V1.0" wrapText="true" styleClass="rail-body"/>
-                <Label text="V2.0 center views planned" wrapText="true" styleClass="rail-body"/>
-            </VBox>
-            <VBox spacing="8.0" styleClass="rail-panel">
-                <Label text="Runtime Statistics" styleClass="rail-title"/>
-                <Label text="Mode: Dev" styleClass="rail-body"/>
-                <Label text="Device: Control Prime" styleClass="rail-body"/>
-                <Label text="Network: Optional" styleClass="rail-body"/>
-                <Label text="Modules: Placeholder" styleClass="rail-body"/>
-            </VBox>
-        </VBox>
-    </right>
-
-    <bottom>
-        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="footer-bar">
-            <padding>
-                <Insets bottom="8.0" left="18.0" right="18.0" top="8.0"/>
-            </padding>
-            <Label text="Aetherion MasterCore V1.0" styleClass="footer-label"/>
-            <Separator orientation="VERTICAL"/>
-            <Label fx:id="footerStatus" text="Offline runtime ready." styleClass="footer-status"/>
-        </HBox>
-    </bottom>
-</BorderPane>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Separator fx:id="Blanks" layoutY="186.0" pickOnBounds="false" prefHeight="25.0" prefWidth="603.0" scaleShape="false" style="-fx-background-color: BLUE;" visible="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+      <Separator fx:id="Blanks" layoutX="290.0" orientation="VERTICAL" pickOnBounds="false" prefHeight="399.0" prefWidth="17.0" scaleShape="false" style="-fx-background-color: GOLD;" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="0.0" />
+      <AnchorPane layoutX="-1.0" layoutY="-1.0" prefHeight="189.0" prefWidth="600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <ToolBar layoutX="3.0" layoutY="3.0" prefHeight="21.0" prefWidth="592.0" AnchorPane.leftAnchor="3.0" AnchorPane.rightAnchor="3.0" AnchorPane.topAnchor="3.0">
+               <items>
+                  <MenuButton alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="27.0" scaleShape="false" text="File" textAlignment="CENTER">
+                    <items>
+                      <MenuItem mnemonicParsing="false" text="Action 1" />
+                      <MenuItem mnemonicParsing="false" text="Action 2" />
+                    </items>
+                  </MenuButton>
+                  <MenuButton alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="27.0" scaleShape="false" text="DEV" textAlignment="CENTER">
+                     <items>
+                        <MenuItem mnemonicParsing="false" text="Action 1" />
+                        <MenuItem mnemonicParsing="false" text="Action 2" />
+                     </items>
+                  </MenuButton>
+                  <MenuButton alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="27.0" scaleShape="false" text="DEV" textAlignment="CENTER">
+                     <items>
+                        <MenuItem mnemonicParsing="false" text="Action 1" />
+                        <MenuItem mnemonicParsing="false" text="Action 2" />
+                     </items>
+                  </MenuButton>
+                  <MenuButton alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="27.0" scaleShape="false" text="DEV" textAlignment="CENTER">
+                     <items>
+                        <MenuItem mnemonicParsing="false" text="Action 1" />
+                        <MenuItem mnemonicParsing="false" text="Action 2" />
+                     </items>
+                  </MenuButton>
+                  <Button mnemonicParsing="false" scaleShape="false" text=" Dev(Comus)">
+                     <graphic>
+                        <ImageView fitHeight="23.0" fitWidth="23.0" pickOnBounds="true" preserveRatio="true" />
+                     </graphic>
+                  </Button>
+                  <Button mnemonicParsing="false" scaleShape="false" text=" Dev(Comus)">
+                     <graphic>
+                        <ImageView fitHeight="23.0" fitWidth="23.0" pickOnBounds="true" preserveRatio="true" />
+                     </graphic>
+                  </Button>
+               </items>
+            </ToolBar>
+            <ImageView fitHeight="133.0" fitWidth="65.0" layoutX="20.0" layoutY="50.0" pickOnBounds="true" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="3.0" AnchorPane.topAnchor="50.0">
+               <image>
+                  <Image url="@logo.png" />
+               </image>
+            </ImageView>
+            <Hyperlink layoutX="78.0" layoutY="44.0" prefHeight="24.0" prefWidth="212.0" scaleShape="false" text="Hyperlink" />
+            <TreeTableView layoutX="76.0" layoutY="66.0" prefHeight="72.0" prefWidth="212.0" scaleShape="false">
+              <columns>
+                <TreeTableColumn prefWidth="102.08587646484375" text="C1" />
+                <TreeTableColumn prefWidth="108.7607421875" text="C2" />
+              </columns>
+            </TreeTableView>
+            <TabPane layoutX="309.0" layoutY="44.0" prefHeight="143.0" prefWidth="288.0" scaleShape="false" tabClosingPolicy="UNAVAILABLE">
+              <tabs>
+                <Tab text="Untitled Tab 1">
+                  <content>
+                    <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="114.0" prefWidth="291.0" scaleShape="false">
+                           <children>
+                              <ProgressBar layoutX="3.0" layoutY="3.0" prefHeight="18.0" prefWidth="138.0" progress="0.0" scaleShape="false" AnchorPane.leftAnchor="3.0" AnchorPane.topAnchor="3.0" />
+                              <ProgressBar layoutX="2.9447853449905805" layoutY="22.791411552930295" prefHeight="18.0" prefWidth="138.0" progress="0.0" scaleShape="false" AnchorPane.leftAnchor="2.9447853449905805" AnchorPane.topAnchor="24.0" />
+                              <ProgressBar layoutX="2.9447853449905805" layoutY="42.81595189886624" prefHeight="18.0" prefWidth="138.0" progress="0.0" scaleShape="false" AnchorPane.leftAnchor="3.0" AnchorPane.topAnchor="46.0" />
+                              <ProgressBar layoutX="2.9447853449905805" layoutY="82.04294672873436" prefHeight="18.0" prefWidth="138.0" progress="0.0" scaleShape="false" AnchorPane.leftAnchor="2.9447853449905805" AnchorPane.topAnchor="89.0" />
+                              <ProgressBar layoutX="2.9447853449905805" layoutY="62.55828275992465" prefHeight="18.0" prefWidth="138.0" progress="0.0" scaleShape="false" AnchorPane.leftAnchor="2.9447853449905805" AnchorPane.topAnchor="67.0" />
+                              <ListView layoutX="143.70552483554033" layoutY="1.0" prefHeight="108.0" prefWidth="145.0" scaleShape="false" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="144.0" AnchorPane.rightAnchor="3.0" AnchorPane.topAnchor="3.0" />
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </Tab>
+                <Tab text="Untitled Tab 2">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" scaleShape="false">
+                           <children>
+                              <RadioButton layoutX="2.9447853449905805" layoutY="5.122699482986812" mnemonicParsing="false" prefHeight="18.0" prefWidth="98.0" scaleShape="false" text="RadioButton" AnchorPane.leftAnchor="2.9447853449905805" AnchorPane.topAnchor="5.122699482986812" />
+                              <RadioButton layoutX="2.9447853449905805" layoutY="27.503068104915222" mnemonicParsing="false" prefHeight="18.0" prefWidth="98.0" scaleShape="false" text="RadioButton" AnchorPane.leftAnchor="2.9447853449905805" AnchorPane.topAnchor="27.503068104915222" />
+                              <RadioButton layoutX="2.9447853449905805" layoutY="49.650307933837986" mnemonicParsing="false" prefHeight="18.0" prefWidth="98.0" scaleShape="false" text="RadioButton" AnchorPane.leftAnchor="2.9447853449905805" AnchorPane.topAnchor="49.650307933837986" />
+                              <RadioButton layoutX="2.9447853449905805" layoutY="69.67484827977393" mnemonicParsing="false" prefHeight="18.0" prefWidth="98.0" scaleShape="false" text="RadioButton" AnchorPane.leftAnchor="2.9447853449905805" AnchorPane.topAnchor="69.67484827977393" />
+                              <RadioButton layoutX="2.9447853449905805" layoutY="90.28834569470798" mnemonicParsing="false" prefHeight="18.0" prefWidth="98.0" scaleShape="false" text="RadioButton" AnchorPane.bottomAnchor="6.889570689981156" AnchorPane.leftAnchor="2.9447853449905805" AnchorPane.topAnchor="90.28834569470798" />
+                              <ListView layoutX="95.0" layoutY="-2.0" prefHeight="115.0" prefWidth="131.0" scaleShape="false" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="94.0" AnchorPane.rightAnchor="3.0" AnchorPane.topAnchor="3.0" />
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </Tab>
+                  <Tab text="Untitled Tab 3">
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" scaleShape="false">
+                           <children>
+                              <ColorPicker layoutX="14.0" layoutY="18.0" prefHeight="27.0" prefWidth="170.0" scaleShape="false" AnchorPane.leftAnchor="3.0" AnchorPane.topAnchor="3.0" />
+                              <DatePicker scaleShape="false" AnchorPane.leftAnchor="3.0" AnchorPane.topAnchor="33.0" />
+                              <Spinner layoutX="6.0" layoutY="60.0" prefHeight="27.0" prefWidth="171.0" scaleShape="false" AnchorPane.leftAnchor="3.0" AnchorPane.topAnchor="63.0" />
+                              <CheckBox layoutX="21.0" layoutY="91.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="80.0" scaleShape="false" text="CheckBox" AnchorPane.leftAnchor="3.0" AnchorPane.topAnchor="92.0" />
+                              <CheckBox layoutX="31.0" layoutY="101.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="80.0" scaleShape="false" text="CheckBox" AnchorPane.leftAnchor="93.0" AnchorPane.topAnchor="91.0" />
+                              <WebView layoutX="185.0" layoutY="8.245398965973624" prefHeight="109.0" prefWidth="100.0" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="177.0" AnchorPane.rightAnchor="3.0" AnchorPane.topAnchor="3.0" />
+                           </children>
+                        </AnchorPane>
+                    </content>
+                  </Tab>
+              </tabs>
+            </TabPane>
+         </children>
+      </AnchorPane>
+      <ToggleButton layoutX="75.0" layoutY="156.0" mnemonicParsing="false" prefHeight="21.0" prefWidth="87.0" scaleShape="false" text="ToggleButton" />
+      <TextField layoutX="75.0" layoutY="139.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="14.0" prefWidth="87.0" />
+      <ToggleButton layoutX="202.0" layoutY="155.0" mnemonicParsing="false" prefHeight="21.0" prefWidth="87.0" scaleShape="false" text="ToggleButton" />
+      <TextField layoutX="202.0" layoutY="138.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="14.0" prefWidth="87.0" />
+      <GridPane layoutX="161.0" layoutY="142.0" prefHeight="41.0" prefWidth="41.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <ProgressIndicator progress="0.0" />
+            <ProgressIndicator progress="0.0" GridPane.columnIndex="1" />
+         </children>
+      </GridPane>
+      <Label alignment="CENTER" contentDisplay="CENTER" layoutX="5.0" layoutY="188.0" prefHeight="21.0" prefWidth="282.0" scaleShape="false" text="Tittle" textAlignment="CENTER" AnchorPane.bottomAnchor="191.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="188.0" />
+      <Label alignment="CENTER" contentDisplay="CENTER" layoutX="35.15951000189073" layoutY="187.2883479414009" prefHeight="21.0" prefWidth="282.0" scaleShape="false" text="File Name" textAlignment="CENTER" AnchorPane.leftAnchor="311.0" AnchorPane.topAnchor="187.0" />
+      <ScrollPane layoutX="12.0" layoutY="203.0" prefHeight="200.0" prefWidth="200.0" scaleShape="false" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="-3.0" AnchorPane.leftAnchor="3.0" AnchorPane.rightAnchor="3.0" AnchorPane.topAnchor="214.0">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="190.0" prefWidth="595.0" scaleShape="false">
+               <children>
+                  <TextArea prefHeight="187.0" prefWidth="345.0" scaleShape="false" AnchorPane.bottomAnchor="13.0" AnchorPane.leftAnchor="3.0" AnchorPane.rightAnchor="-147.0" AnchorPane.topAnchor="0.0" />
+               </children>
+            </AnchorPane>
+        </content>
+      </ScrollPane>
+   </children>
+</AnchorPane>
