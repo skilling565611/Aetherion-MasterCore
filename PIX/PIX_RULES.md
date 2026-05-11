@@ -1,6 +1,4 @@
-Create this file:
-
-PIX/PIX_RULES.md
+# PIX Rules
 
 Purpose:
 This file contains the permanent rules for the PIX area. Both Arctic Prime and Control Prime must read this file before making changes involving PIX.
@@ -27,10 +25,6 @@ System names:
 - Control Prime = Main PC / build workstation
 - Arctic Prime = Laptop / verification and recovery system
 
-Important:
-This file should only change when the user updates the PIX rules
-Update PIX_RULES.md with the following communication command structure.
-
 Command Keywords:
 
 Control Prime:
@@ -51,7 +45,7 @@ Both Systems:
   Meaning:
   Approved to safely sync latest verified repository state.
 
-Important Rules:
+Important command rules:
 
 1. Commands must only execute after verification.
 2. No automatic push behavior.
@@ -60,5 +54,8 @@ Important Rules:
 5. Arctic Prime may act as temporary recovery source-of-truth.
 6. Control Prime may act as main build/development source.
 
-Purpose:
+Command purpose:
 Reduce accidental sync conflicts and maintain stable coordination between Control Prime and Arctic Prime.
+
+Important:
+This file should only change when the user updates the PIX rules.
