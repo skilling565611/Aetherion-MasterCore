@@ -1,0 +1,26 @@
+Control Prime:
+
+Please re-check and re-run the PIX recovery/update process carefully.
+
+Important context:
+
+- Arctic Prime stopped the pull before the PIX deletion synced fully.
+- PIX was restored/recreated on Arctic Prime.
+- The earlier pull process was interrupted/stopped intentionally to prevent deletion sync.
+- Some earlier actions may not have completed fully because the process was halted.
+
+Tasks:
+
+1. Re-read the PIX area first.
+2. Verify:
+   - PIX/
+   - PC_Pix.dev
+   - Pix.dev
+3. Re-check Git state safely.
+4. Re-run only the safe recovery/update steps if needed.
+5. Do NOT delete PIX again.
+6. Do NOT hard reset.
+7. Do NOT force overwrite Arctic Prime recovery data.
+
+Goal:
+Safely stabilize and sync the restored PIX state between Arctic Prime and Control Prime.
