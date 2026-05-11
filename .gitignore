@@ -26,8 +26,10 @@ bin/
 obj/
 
 # Generated desktop package output
-res/Exe/output/
 res/Exe/generated/
+res/Exe/output/*
+!res/Exe/output/
+!res/Exe/output/*.exe
 res/Exe/*.exe
 res/Exe/*.msi
 PIX/Pix.dev
