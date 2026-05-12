@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import re
 import shutil
 from dataclasses import dataclass
@@ -28,6 +29,9 @@ DEFAULT_SOURCE_DIR = REPO_ROOT / "AI/PIX"
 DEFAULT_OUTPUT_ROOT = REPO_ROOT / "AI/Perchance/IMG"
 DEFAULT_CHARACTER = "Nyra_Vale"
 DEFAULT_LOG_DIR = REPO_ROOT / "AI/ImageTools/Logs"
+DEFAULT_CONFIG_PATH = REPO_ROOT / "AI/ImageTools/Configs/default_config.json"
+DEFAULT_AI_MODEL = REPO_ROOT / "AI/ImageTools/models/model_q4f16.onnx"
+DEFAULT_AI_LABELS = REPO_ROOT / "AI/ImageTools/models/rating_labels.json"
 
 
 @dataclass(frozen=True)
@@ -89,7 +93,10 @@ def analyze_with_pillow(path: Path, max_side: int = 96) -> VisualSignals:
     except Exception:
         return VisualSignals(
             pillow_available=False,
-            error="Pillow is missing. Install it with: python -m pip install Pillow",
+            error=(
+                "Pillow is missing. Install it with: python -m pip install -e AI/ImageTools "
+                "or python -m pip install -r AI/ImageTools/Requirements/image.txt"
+            ),
         )
 
     try:
@@ -190,6 +197,55 @@ def scan_report_entry(meta: ImageMeta, signals: VisualSignals) -> dict[str, obje
             "error": signals.error,
         },
     }
+
+
+def resolve_config_path(value: str | Path | None) -> Path | None:
+    """Resolve user-friendly config paths from the repository root.
+
+    Beginners often run this script from the repo root, so relative config
+    paths are treated as repo-relative instead of depending on the shell's
+    current directory.
+    """
+
+    if value is None:
+        return None
+    path = Path(value)
+    return path if path.is_absolute() else REPO_ROOT / path
+
+
+def resolve_repo_path(value: str | Path | None) -> Path | None:
+    """Resolve config paths while keeping absolute paths unchanged."""
+
+    if value in (None, ""):
+        return None
+    path = Path(value)
+    return path if path.is_absolute() else REPO_ROOT / path
+
+
+def load_config(config_path: Path | None) -> dict[str, object]:
+    """Load optional JSON config without making it required.
+
+    The command line remains fully usable without a config file. When a config
+    is supplied, those values become defaults and normal CLI flags can still
+    override them.
+    """
+
+    if config_path is None:
+        return {}
+    if not config_path.exists():
+        raise SystemExit(f"Config file does not exist: {config_path}")
+    try:
+        payload = json.loads(config_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise SystemExit(f"Config file is not valid JSON: {config_path} ({error})") from error
+    if not isinstance(payload, dict):
+        raise SystemExit(f"Config file must contain a JSON object: {config_path}")
+    return payload
+
+
+def config_bool(config: dict[str, object], key: str, default: bool) -> bool:
+    value = config.get(key, default)
+    return bool(value)
 
 
 def organize_images(
@@ -319,24 +375,43 @@ def organize_images(
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Lightweight local image rating organizer for Aetherion character assets.")
-    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE_DIR, help=f"Source folder. Default: {DEFAULT_SOURCE_DIR}")
-    parser.add_argument("--output", "--target-root", dest="output", type=Path, default=DEFAULT_OUTPUT_ROOT, help=f"Output root. Default: {DEFAULT_OUTPUT_ROOT}")
-    parser.add_argument("--character", default=DEFAULT_CHARACTER, help=f"Default character folder. Default: {DEFAULT_CHARACTER}")
+    # Pre-parse only --config so JSON values can become parser defaults. This
+    # keeps every existing command-line argument working while allowing command
+    # line values to override the config file.
+    pre_parser = argparse.ArgumentParser(add_help=False)
+    pre_parser.add_argument("--config", type=Path, default=None, help="Optional JSON config file.")
+    pre_args, remaining = pre_parser.parse_known_args()
+    config_path = resolve_config_path(pre_args.config)
+    config = load_config(config_path)
+
+    source_default = resolve_repo_path(config.get("source")) or DEFAULT_SOURCE_DIR
+    output_default = resolve_repo_path(config.get("output")) or DEFAULT_OUTPUT_ROOT
+    log_dir_default = resolve_repo_path(config.get("log_dir")) or DEFAULT_LOG_DIR
+    ai_model_default = resolve_repo_path(config.get("ai_model")) or DEFAULT_AI_MODEL
+    ai_labels_default = resolve_repo_path(config.get("ai_labels")) or DEFAULT_AI_LABELS
+
+    parser = argparse.ArgumentParser(
+        description="Lightweight local image rating organizer for Aetherion character assets.",
+        parents=[pre_parser],
+    )
+    parser.set_defaults(config=config_path)
+    parser.add_argument("--source", type=Path, default=source_default, help=f"Source folder. Default: {DEFAULT_SOURCE_DIR}")
+    parser.add_argument("--output", "--target-root", dest="output", type=Path, default=output_default, help=f"Output root. Default: {DEFAULT_OUTPUT_ROOT}")
+    parser.add_argument("--character", default=str(config.get("character", DEFAULT_CHARACTER)), help=f"Default character folder. Default: {DEFAULT_CHARACTER}")
     parser.add_argument("--known-character", action="append", default=[], help="Additional character name to detect from paths.")
-    parser.add_argument("--recursive", action=argparse.BooleanOptionalAction, default=True, help="Scan recursively. Default: true")
-    parser.add_argument("--use-ai", action="store_true", help="Enable optional local AI hook when dependencies/model are installed.")
-    parser.add_argument("--ai-model", type=Path, default=None, help="Optional local ONNX model path for --use-ai.")
-    parser.add_argument("--ai-labels", type=Path, default=None, help="Optional JSON labels file for --use-ai.")
-    parser.add_argument("--dry-run", action="store_true", help="Preview decisions without copying files.")
-    parser.add_argument("--copy-only", action="store_true", default=True, help="Safety flag; copy-only is always enforced.")
-    parser.add_argument("--confidence-threshold", type=float, default=0.70, help="Review threshold. Default: 0.70")
-    parser.add_argument("--review-uncertain", action=argparse.BooleanOptionalAction, default=True, help="Send low-confidence images to Review_Needed.")
-    parser.add_argument("--log-dir", type=Path, default=DEFAULT_LOG_DIR, help=f"JSON log folder. Default: {DEFAULT_LOG_DIR}")
-    parser.add_argument("--no-rename", action="store_true", help="Keep original filename except when duplicate-safe suffixes are needed.")
+    parser.add_argument("--recursive", action=argparse.BooleanOptionalAction, default=config_bool(config, "recursive", True), help="Scan recursively. Default: true")
+    parser.add_argument("--use-ai", action="store_true", default=config_bool(config, "use_ai", False), help="Enable optional local AI hook when dependencies/model are installed.")
+    parser.add_argument("--ai-model", type=Path, default=ai_model_default, help="Optional local ONNX model path for --use-ai.")
+    parser.add_argument("--ai-labels", type=Path, default=ai_labels_default, help="Optional JSON labels file for --use-ai.")
+    parser.add_argument("--dry-run", action="store_true", default=config_bool(config, "dry_run", False), help="Preview decisions without copying files.")
+    parser.add_argument("--copy-only", action="store_true", default=config_bool(config, "copy_only", True), help="Safety flag; copy-only is always enforced.")
+    parser.add_argument("--confidence-threshold", type=float, default=float(config.get("confidence_threshold", 0.70)), help="Review threshold. Default: 0.70")
+    parser.add_argument("--review-uncertain", action=argparse.BooleanOptionalAction, default=config_bool(config, "review_uncertain", True), help="Send low-confidence images to Review_Needed.")
+    parser.add_argument("--log-dir", type=Path, default=log_dir_default, help=f"JSON log folder. Default: {DEFAULT_LOG_DIR}")
+    parser.add_argument("--no-rename", action="store_true", default=not config_bool(config, "rename", True), help="Keep original filename except when duplicate-safe suffixes are needed.")
     parser.add_argument("--list", action="store_true", help="Only list supported images.")
-    parser.add_argument("--debug", action="store_true", help="Print debug output for each decision.")
-    return parser.parse_args()
+    parser.add_argument("--debug", action="store_true", default=config_bool(config, "debug", False), help="Print debug output for each decision.")
+    return parser.parse_args(remaining)
 
 
 def main() -> int:

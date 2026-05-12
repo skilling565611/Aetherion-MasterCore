@@ -12,6 +12,8 @@ from typing import Any
 from urllib.parse import unquote
 
 from image_organizer import (
+    DEFAULT_AI_LABELS,
+    DEFAULT_AI_MODEL,
     DEFAULT_CHARACTER,
     DEFAULT_LOG_DIR,
     DEFAULT_OUTPUT_ROOT,
@@ -39,6 +41,8 @@ class OrganizeJob:
     log_dir: Path
     rename: bool
     use_ai: bool
+    ai_model: Path
+    ai_labels: Path
     confidence_threshold: float
     review_uncertain: bool
     status: str = "queued"
@@ -222,6 +226,10 @@ HTML = r"""<!doctype html>
         <input id="character" type="text">
         <label for="reportDir">JSON log folder</label>
         <input id="reportDir" type="text">
+        <label for="aiModel">Local ONNX model</label>
+        <input id="aiModel" type="text">
+        <label for="aiLabels">Rating labels</label>
+        <input id="aiLabels" type="text">
         <div class="row">
           <div>
             <label for="confidence">Review threshold</label>
@@ -282,6 +290,8 @@ HTML = r"""<!doctype html>
       $("targetRoot").value = data.output_root;
       $("character").value = data.default_character;
       $("reportDir").value = data.report_dir;
+      $("aiModel").value = data.ai_model;
+      $("aiLabels").value = data.ai_labels;
       $("categories").textContent = data.categories.join(", ");
       await scan();
     }
@@ -311,6 +321,8 @@ HTML = r"""<!doctype html>
           log_dir: $("reportDir").value,
           rename: $("rename").checked,
           use_ai: $("useAi").checked,
+          ai_model: $("aiModel").value,
+          ai_labels: $("aiLabels").value,
           confidence_threshold: Number($("confidence").value),
           review_uncertain: $("reviewUncertain").checked,
         }),
@@ -364,6 +376,8 @@ class ImageGuiHandler(BaseHTTPRequestHandler):
                     "source_dir": str(DEFAULT_SOURCE_DIR.resolve()),
                     "output_root": str(DEFAULT_OUTPUT_ROOT.resolve()),
                     "report_dir": str(DEFAULT_LOG_DIR.resolve()),
+                    "ai_model": str(DEFAULT_AI_MODEL.resolve()),
+                    "ai_labels": str(DEFAULT_AI_LABELS.resolve()),
                     "categories": list(RATING_CATEGORIES),
                     "default_character": DEFAULT_CHARACTER,
                 }
@@ -408,6 +422,8 @@ class ImageGuiHandler(BaseHTTPRequestHandler):
                     log_dir=Path(payload.get("log_dir", DEFAULT_LOG_DIR)),
                     rename=bool(payload.get("rename", True)),
                     use_ai=bool(payload.get("use_ai", False)),
+                    ai_model=Path(payload.get("ai_model", DEFAULT_AI_MODEL)),
+                    ai_labels=Path(payload.get("ai_labels", DEFAULT_AI_LABELS)),
                     confidence_threshold=float(payload.get("confidence_threshold", 0.70)),
                     review_uncertain=bool(payload.get("review_uncertain", True)),
                 )
@@ -506,6 +522,8 @@ def run_job(job: OrganizeJob) -> None:
             log_dir=job.log_dir,
             rename=job.rename,
             use_ai=job.use_ai,
+            ai_model=job.ai_model,
+            ai_labels=job.ai_labels,
             confidence_threshold=job.confidence_threshold,
             review_uncertain=job.review_uncertain,
         )

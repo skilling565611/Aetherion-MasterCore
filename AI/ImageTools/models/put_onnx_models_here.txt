@@ -1,0 +1,9 @@
+Place optional local ONNX model files in this folder.
+
+Current model:
+AI/ImageTools/models/model_q4f16.onnx
+
+Expected labels:
+AI/ImageTools/models/rating_labels.json
+
+ImageTools still runs without these files because AI mode is optional and disabled by default.

@@ -87,6 +87,11 @@ class LocalAIClassifier:
             options = ort.SessionOptions()
             options.intra_op_num_threads = 1
             options.inter_op_num_threads = 1
+            # Quantized or converted ONNX models can fail during optional graph
+            # fusion passes even when the model itself is usable. Disabling
+            # graph optimization is slower, but safer for Arctic Prime and keeps
+            # the local AI hook CPU-only and conservative.
+            options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_DISABLE_ALL
             self.session = ort.InferenceSession(
                 str(self.config.model_path),
                 sess_options=options,

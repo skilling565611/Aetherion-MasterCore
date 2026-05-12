@@ -1,0 +1,14 @@
+{
+  "source": "AI/PIX",
+  "output": "AI/Perchance/IMG",
+  "character": "Nyra_Vale",
+  "dry_run": true,
+  "copy_only": true,
+  "use_ai": false,
+  "confidence_threshold": 0.7,
+  "review_uncertain": true,
+  "recursive": true,
+  "debug": true,
+  "ai_model": "AI/ImageTools/models/model_q4f16.onnx",
+  "ai_labels": "AI/ImageTools/models/rating_labels.json"
+}
