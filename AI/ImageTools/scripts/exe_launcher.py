@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -28,6 +27,14 @@ def app_root() -> Path:
     if running_as_exe():
         return Path(sys.executable).resolve().parent
     return PROJECT_DIR
+
+
+def model_source_root() -> Path:
+    """Return the preferred ONNX model folder for this run mode."""
+
+    if running_as_exe():
+        return app_root() / "Models/ONNX"
+    return PROJECT_DIR / "Models/ONNX"
 
 
 def config_path() -> Path:
@@ -57,6 +64,8 @@ def resolve_app_path(value: str | Path | None, fallback: Path) -> Path:
         remaps = {
             "AI/ImageTools/Configs/default_config.json": exe_root / "Configs/default_config.json",
             "AI/ImageTools/Training/corrections.json": exe_root / "Training/corrections.json",
+            "AI/ImageTools/Models/ONNX/model.onnx": exe_root / "Models/ONNX/model.onnx",
+            "AI/ImageTools/Models/ONNX/labels.json": exe_root / "Models/ONNX/labels.json",
             "AI/ImageTools/models/model_quantized.onnx": exe_root / "Models/Lite/model_quantized.onnx",
             "AI/ImageTools/models/rating_labels.quantized.json": exe_root / "Models/Lite/rating_labels.quantized.json",
             "AI/ImageTools/Logs": exe_root / "Logs",
@@ -82,8 +91,8 @@ def organizer_paths(config: dict[str, Any]) -> dict[str, Path]:
         "source": resolve_app_path(config.get("source", "Input"), root / "Input"),
         "output": resolve_app_path(config.get("output", "Output"), root / "Output"),
         "log_dir": resolve_app_path(config.get("log_dir", "Logs"), root / "Logs"),
-        "ai_model": resolve_app_path(config.get("ai_model", "Models/Lite/model_quantized.onnx"), root / "Models/Lite/model_quantized.onnx"),
-        "ai_labels": resolve_app_path(config.get("ai_labels", "Models/Lite/rating_labels.quantized.json"), root / "Models/Lite/rating_labels.quantized.json"),
+        "ai_model": resolve_app_path(config.get("ai_model", "Models/ONNX/model.onnx"), model_source_root() / "model.onnx"),
+        "ai_labels": resolve_app_path(config.get("ai_labels", "Models/ONNX/labels.json"), model_source_root() / "labels.json"),
         "corrections": resolve_app_path(config.get("corrections", "Training/corrections.json"), root / "Training/corrections.json"),
     }
 
@@ -101,6 +110,7 @@ def run_organizer(force_dry_run: bool) -> None:
     print(f"Source: {paths['source']}")
     print(f"Output: {paths['output']}")
     print(f"Logs:   {paths['log_dir']}")
+    print(f"ONNX:   {paths['ai_model']} [{'found' if paths['ai_model'].exists() else 'missing'}]")
     print(f"Mode:   {'DRY RUN' if force_dry_run else 'COPY'}")
     print()
 
@@ -124,6 +134,7 @@ def run_organizer(force_dry_run: bool) -> None:
         use_ai=bool(config.get("use_ai", False)),
         ai_model=paths["ai_model"],
         ai_labels=paths["ai_labels"],
+        ai_model_load_mode="packaged_exe" if running_as_exe() else "source",
         ai_flip_binary_labels=bool(config.get("ai_flip_binary_labels", False)),
         ai_debug_outputs=bool(config.get("ai_debug_outputs", False)),
         force_review_on_suspicious_sfw=bool(config.get("force_review_on_suspicious_sfw", True)),
@@ -159,7 +170,9 @@ def check_paths() -> None:
         status = "OK" if path.exists() else "MISSING"
         print(f"{label}: {path} [{status}]")
     print()
-    print("Models are external. Put ONNX files in Models/Lite, Models/Medium, or Models/Heavy.")
+    print("Keep Models/ONNX beside the EXE. Expected model file: Models/ONNX/model.onnx")
+    if not paths["ai_model"].exists():
+        print("ONNX missing: put model.onnx in Models/ONNX before enabling AI mode.")
 
 
 def pause() -> None:
@@ -200,4 +213,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

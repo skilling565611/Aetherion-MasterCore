@@ -13,8 +13,10 @@ BUILD_DIR = PROJECT_DIR / "Build"
 ENTRY_POINT = PROJECT_DIR / "scripts/exe_launcher.py"
 PYINSTALLER_DIST = BUILD_DIR / "PyInstallerDist"
 PYINSTALLER_WORK = BUILD_DIR / "PyInstallerWork"
-FINAL_FOLDER = BUILD_DIR / "Aetherion_ImageTools"
+FINAL_FOLDER = REPO_ROOT / "dist/AetherionImageTools"
 EXE_NAME = "AetherionImageTools"
+SOURCE_ONNX_FOLDER = PROJECT_DIR / "Models/ONNX"
+SOURCE_ONNX_FALLBACK = PROJECT_DIR / "models/ONNX"
 
 
 def remove_folder(path: Path) -> None:
@@ -26,6 +28,25 @@ def copy_file_if_exists(source: Path, target: Path) -> None:
     if source.exists():
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
+
+
+def copy_folder_if_exists(source: Path, target: Path) -> None:
+    """Copy an external editable folder into the portable EXE folder."""
+
+    if source.exists():
+        if target.exists():
+            shutil.rmtree(target)
+        shutil.copytree(source, target)
+
+
+def source_onnx_folder() -> Path | None:
+    """Find the source ONNX folder without depending on path casing."""
+
+    if SOURCE_ONNX_FOLDER.exists():
+        return SOURCE_ONNX_FOLDER
+    if SOURCE_ONNX_FALLBACK.exists():
+        return SOURCE_ONNX_FALLBACK
+    return None
 
 
 def write_exe_config(source_config: Path, target_config: Path) -> None:
@@ -41,11 +62,11 @@ def write_exe_config(source_config: Path, target_config: Path) -> None:
             "output": "Output",
             "log_dir": "Logs",
             "corrections": "Training/corrections.json",
-            "ai_model": "Models/Lite/model_quantized.onnx",
-            "ai_labels": "Models/Lite/rating_labels.quantized.json",
+            "ai_model": "Models/ONNX/model.onnx",
+            "ai_labels": "Models/ONNX/labels.json",
             "dry_run": True,
             "copy_only": True,
-            "use_ai": False,
+            "use_ai": True,
         }
     )
     target_config.parent.mkdir(parents=True, exist_ok=True)
@@ -67,8 +88,9 @@ Folders:
   Models/Lite/
   Models/Medium/
   Models/Heavy/
-    Put external ONNX model files and label JSON files here.
-    Large model files are not bundled inside the EXE.
+  Models/ONNX/
+    Keep model.onnx, labels.json, config.json, and preprocessor_config.json here.
+    This folder is copied from AI/ImageTools/Models/ONNX during the Control Prime build.
 
   Training/corrections.json
     Editable local manual corrections. Keep this file with the EXE folder.
@@ -85,6 +107,22 @@ Safety:
 Notes:
   Arctic Prime does not need Python installed to run this EXE.
   Build this package on Control Prime with PyInstaller.
+"""
+    path.write_text(text, encoding="utf-8")
+
+
+def write_run_first_readme(path: Path) -> None:
+    text = """Aetherion ImageTools - Run First
+
+1. Keep the Models/ONNX folder beside AetherionImageTools.exe.
+2. Run dry-run first from the EXE menu.
+3. Do not move or delete the Models folder.
+4. If the classifier says ONNX missing, check:
+   Models/ONNX/model.onnx
+
+The EXE should not require Python on Arctic Prime.
+Logs are written to the Logs folder beside the EXE.
+Original images are never deleted, moved, or modified.
 """
     path.write_text(text, encoding="utf-8")
 
@@ -132,6 +170,7 @@ def create_final_folder() -> None:
         (FINAL_FOLDER / "Training/corrections.json").write_text('{"corrections": []}\n', encoding="utf-8")
 
     for folder in (
+        FINAL_FOLDER / "Models/ONNX",
         FINAL_FOLDER / "Models/Lite",
         FINAL_FOLDER / "Models/Medium",
         FINAL_FOLDER / "Models/Heavy",
@@ -141,9 +180,18 @@ def create_final_folder() -> None:
     ):
         folder.mkdir(parents=True, exist_ok=True)
 
+    onnx_folder = source_onnx_folder()
+    if onnx_folder is not None:
+        copy_folder_if_exists(onnx_folder, FINAL_FOLDER / "Models/ONNX")
+    if not (FINAL_FOLDER / "Models/ONNX/model.onnx").exists():
+        print("WARNING: ONNX model was not found at AI/ImageTools/Models/ONNX/model.onnx")
+        print("         The EXE was built, but AI mode needs Models/ONNX/model.onnx beside the EXE.")
+
     copy_file_if_exists(PROJECT_DIR / "README.md", FINAL_FOLDER / "ImageTools_README.md")
     copy_file_if_exists(PROJECT_DIR / "Training/README.md", FINAL_FOLDER / "Training/README.md")
+    copy_file_if_exists(PROJECT_DIR / "Training/labels.json", FINAL_FOLDER / "Training/labels.json")
     write_readme(FINAL_FOLDER / "README.txt")
+    write_run_first_readme(FINAL_FOLDER / "README_Run_First.txt")
 
 
 def main() -> int:
@@ -170,4 +218,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

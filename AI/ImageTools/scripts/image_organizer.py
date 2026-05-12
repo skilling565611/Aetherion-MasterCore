@@ -35,8 +35,8 @@ DEFAULT_OUTPUT_ROOT = REPO_ROOT / "AI/Perchance/IMG"
 DEFAULT_CHARACTER = "Nyra_Vale"
 DEFAULT_LOG_DIR = REPO_ROOT / "AI/ImageTools/Logs"
 DEFAULT_CONFIG_PATH = REPO_ROOT / "AI/ImageTools/Configs/default_config.json"
-DEFAULT_AI_MODEL = REPO_ROOT / "AI/ImageTools/models/model_quantized.onnx"
-DEFAULT_AI_LABELS = REPO_ROOT / "AI/ImageTools/models/rating_labels.quantized.json"
+DEFAULT_AI_MODEL = REPO_ROOT / "AI/ImageTools/Models/ONNX/model.onnx"
+DEFAULT_AI_LABELS = REPO_ROOT / "AI/ImageTools/Models/ONNX/labels.json"
 DEFAULT_CORRECTIONS = REPO_ROOT / "AI/ImageTools/Training/corrections.json"
 
 
@@ -338,6 +338,7 @@ def organize_images(
     use_ai: bool = False,
     ai_model: Path | None = None,
     ai_labels: Path | None = None,
+    ai_model_load_mode: str = "source",
     ai_flip_binary_labels: bool = False,
     ai_debug_outputs: bool = False,
     force_review_on_suspicious_sfw: bool = True,
@@ -360,6 +361,7 @@ def organize_images(
             labels_path=ai_labels,
             flip_binary_labels=ai_flip_binary_labels,
             debug_outputs=ai_debug_outputs,
+            load_mode=ai_model_load_mode,
         ),
     )
     first_hash_path: dict[str, Path] = {}
@@ -369,6 +371,8 @@ def organize_images(
 
     if use_ai and debug:
         print(f"DEBUG ai: {ai_classifier.reason}")
+        print(f"DEBUG ai_model_path: {ai_classifier.model_path}")
+        print(f"DEBUG ai_model_exists: {ai_classifier.model_exists}")
 
     for path in iter_images(source_dir, recursive=recursive):
         signals = analyze_with_pillow(path)
@@ -507,6 +511,7 @@ def organize_images(
             "raw_model_category": ai_decision.category if ai_decision else None,
             "final_organizer_label": decision.category,
         }
+        log_entry.update(ai_classifier.log_metadata())
         log_entry.update(furry_rules.log_fields(final_layer_used))
         log_entry.update(ai_log_metadata(ai_decision))
         reports.add_decision(log_entry)
@@ -611,6 +616,7 @@ def main() -> int:
         use_ai=args.use_ai,
         ai_model=args.ai_model,
         ai_labels=args.ai_labels,
+        ai_model_load_mode="source",
         ai_flip_binary_labels=args.ai_flip_binary_labels,
         ai_debug_outputs=args.ai_debug_outputs,
         force_review_on_suspicious_sfw=args.force_review_on_suspicious_sfw,

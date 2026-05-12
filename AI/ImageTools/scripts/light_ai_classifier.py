@@ -21,6 +21,7 @@ class AIConfig:
     input_size: int = 224
     flip_binary_labels: bool = False
     debug_outputs: bool = False
+    load_mode: str = "source"
 
 
 class LocalAIClassifier:
@@ -64,6 +65,11 @@ class LocalAIClassifier:
         self.available = False
         self.reason = "AI mode disabled"
         self.config = config or AIConfig()
+        self.model_path = self.config.model_path
+        self.labels_path = self.config.labels_path
+        self.model_exists = bool(self.model_path and self.model_path.exists())
+        self.labels_exist = bool(self.labels_path and self.labels_path.exists())
+        self.load_mode = self.config.load_mode
         self.session = None
         self.labels: list[str] = []
         self.label_mapping: dict[str, str] = {}
@@ -78,10 +84,14 @@ class LocalAIClassifier:
             self.reason = "AI mode requested, but no local ONNX model path was provided"
             return
         if not self.config.model_path.exists():
-            self.reason = f"AI model was not found: {self.config.model_path}"
+            self.reason = (
+                "ONNX model missing. Expected model file at "
+                f"{self.config.model_path}. Put model.onnx in Models/ONNX beside the EXE "
+                "or in AI/ImageTools/Models/ONNX when running from source."
+            )
             return
         if not self.config.labels_path or not self.config.labels_path.exists():
-            self.reason = "AI labels JSON was not provided or was not found"
+            self.reason = f"AI labels JSON was not provided or was not found: {self.config.labels_path}"
             return
 
         try:
@@ -127,6 +137,16 @@ class LocalAIClassifier:
 
         self.available = True
         self.reason = "Local CPU ONNX classifier loaded"
+
+    def log_metadata(self) -> dict[str, object]:
+        return {
+            "ai_model_path": str(self.model_path) if self.model_path else None,
+            "ai_model_exists": self.model_exists,
+            "ai_model_load_mode": self.load_mode,
+            "ai_labels_path": str(self.labels_path) if self.labels_path else None,
+            "ai_labels_exists": self.labels_exist,
+            "ai_status": self.reason,
+        }
 
     def classify(self, path: Path, signals: VisualSignals) -> RatingDecision | None:
         if not self.enabled or not self.available or self.session is None or self.input_name is None:

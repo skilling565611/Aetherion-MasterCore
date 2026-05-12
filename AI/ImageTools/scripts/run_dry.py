@@ -33,8 +33,8 @@ def main() -> int:
     source = repo_path(str(config.get("source", "AI/PIX")), REPO_ROOT / "AI/PIX")
     output = repo_path(str(config.get("output", "AI/Perchance/IMG")), REPO_ROOT / "AI/Perchance/IMG")
     log_dir = repo_path(str(config.get("log_dir", "AI/ImageTools/Logs")), DEFAULT_LOG_DIR)
-    ai_model = repo_path(str(config.get("ai_model", "")), PROJECT_DIR / "models/rating_model.onnx")
-    ai_labels = repo_path(str(config.get("ai_labels", "")), PROJECT_DIR / "models/rating_labels.json")
+    ai_model = repo_path(str(config.get("ai_model", "")), PROJECT_DIR / "Models/ONNX/model.onnx")
+    ai_labels = repo_path(str(config.get("ai_labels", "")), PROJECT_DIR / "Models/ONNX/labels.json")
     corrections = repo_path(str(config.get("corrections", "AI/ImageTools/Training/corrections.json")), PROJECT_DIR / "Training/corrections.json")
 
     print("ImageTools dry-run")
@@ -55,6 +55,7 @@ def main() -> int:
         use_ai=bool(config.get("use_ai", False)),
         ai_model=ai_model,
         ai_labels=ai_labels,
+        ai_model_load_mode="source",
         ai_flip_binary_labels=bool(config.get("ai_flip_binary_labels", False)),
         ai_debug_outputs=bool(config.get("ai_debug_outputs", True)),
         force_review_on_suspicious_sfw=bool(config.get("force_review_on_suspicious_sfw", True)),

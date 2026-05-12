@@ -102,7 +102,7 @@ The final folder is written to:
 AI/ImageTools/Build/Aetherion_ImageTools/
 ```
 
-The EXE keeps configs, model files, corrections, training files, and logs external beside the EXE. ONNX model files and large datasets are not bundled. Real copy mode asks for confirmation, and the organizer remains copy-only.
+The EXE keeps configs, corrections, training labels, logs, and output external beside the EXE. The build copies `AI/ImageTools/Models/ONNX` into `dist/AetherionImageTools/Models/ONNX` so Arctic Prime can run the ONNX classifier without a manual model install. Real copy mode asks for confirmation, and the organizer remains copy-only.
 
 The default runner config lives here:
 

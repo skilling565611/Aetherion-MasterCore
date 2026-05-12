@@ -2,6 +2,12 @@ __pycache__/
 *.py[cod]
 .venv/
 models/*.onnx
+Models/ONNX/*.onnx
+!Models/ONNX/README.md
+!Models/ONNX/labels.json
+models/ONNX/*.onnx
+!models/ONNX/README.md
+!models/ONNX/labels.json
 Logs/*.json
 Logs/*.tmp
 Build/Aetherion_ImageTools/
