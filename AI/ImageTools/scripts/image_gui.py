@@ -15,6 +15,7 @@ from image_organizer import (
     DEFAULT_AI_LABELS,
     DEFAULT_AI_MODEL,
     DEFAULT_CHARACTER,
+    DEFAULT_CORRECTIONS,
     DEFAULT_LOG_DIR,
     DEFAULT_OUTPUT_ROOT,
     DEFAULT_SOURCE_DIR,
@@ -43,6 +44,10 @@ class OrganizeJob:
     use_ai: bool
     ai_model: Path
     ai_labels: Path
+    corrections_path: Path
+    ai_flip_binary_labels: bool
+    ai_debug_outputs: bool
+    force_review_on_suspicious_sfw: bool
     confidence_threshold: float
     review_uncertain: bool
     status: str = "queued"
@@ -230,6 +235,8 @@ HTML = r"""<!doctype html>
         <input id="aiModel" type="text">
         <label for="aiLabels">Rating labels</label>
         <input id="aiLabels" type="text">
+        <label for="correctionsPath">Manual corrections</label>
+        <input id="correctionsPath" type="text">
         <div class="row">
           <div>
             <label for="confidence">Review threshold</label>
@@ -245,6 +252,9 @@ HTML = r"""<!doctype html>
         <label class="checkline"><input id="dryRun" type="checkbox"> Dry run only</label>
         <label class="checkline"><input id="reviewUncertain" type="checkbox" checked> Send low-confidence ratings to Review_Needed</label>
         <label class="checkline"><input id="useAi" type="checkbox"> Try optional local AI if installed</label>
+        <label class="checkline"><input id="forceSuspiciousSfw" type="checkbox" checked> Review suspicious AI SFW results</label>
+        <label class="checkline"><input id="aiDebugOutputs" type="checkbox" checked> Log AI debug outputs</label>
+        <label class="checkline"><input id="aiFlipBinaryLabels" type="checkbox"> Flip binary SFW/NSFW labels</label>
         <label class="checkline"><input id="rename" type="checkbox" checked> Generate clean target filenames</label>
         <button id="organize" class="primary">Organize Images</button>
 
@@ -292,6 +302,7 @@ HTML = r"""<!doctype html>
       $("reportDir").value = data.report_dir;
       $("aiModel").value = data.ai_model;
       $("aiLabels").value = data.ai_labels;
+      $("correctionsPath").value = data.corrections;
       $("categories").textContent = data.categories.join(", ");
       await scan();
     }
@@ -323,6 +334,10 @@ HTML = r"""<!doctype html>
           use_ai: $("useAi").checked,
           ai_model: $("aiModel").value,
           ai_labels: $("aiLabels").value,
+          corrections: $("correctionsPath").value,
+          ai_flip_binary_labels: $("aiFlipBinaryLabels").checked,
+          ai_debug_outputs: $("aiDebugOutputs").checked,
+          force_review_on_suspicious_sfw: $("forceSuspiciousSfw").checked,
           confidence_threshold: Number($("confidence").value),
           review_uncertain: $("reviewUncertain").checked,
         }),
@@ -378,6 +393,7 @@ class ImageGuiHandler(BaseHTTPRequestHandler):
                     "report_dir": str(DEFAULT_LOG_DIR.resolve()),
                     "ai_model": str(DEFAULT_AI_MODEL.resolve()),
                     "ai_labels": str(DEFAULT_AI_LABELS.resolve()),
+                    "corrections": str(DEFAULT_CORRECTIONS.resolve()),
                     "categories": list(RATING_CATEGORIES),
                     "default_character": DEFAULT_CHARACTER,
                 }
@@ -424,6 +440,10 @@ class ImageGuiHandler(BaseHTTPRequestHandler):
                     use_ai=bool(payload.get("use_ai", False)),
                     ai_model=Path(payload.get("ai_model", DEFAULT_AI_MODEL)),
                     ai_labels=Path(payload.get("ai_labels", DEFAULT_AI_LABELS)),
+                    corrections_path=Path(payload.get("corrections", DEFAULT_CORRECTIONS)),
+                    ai_flip_binary_labels=bool(payload.get("ai_flip_binary_labels", False)),
+                    ai_debug_outputs=bool(payload.get("ai_debug_outputs", True)),
+                    force_review_on_suspicious_sfw=bool(payload.get("force_review_on_suspicious_sfw", True)),
                     confidence_threshold=float(payload.get("confidence_threshold", 0.70)),
                     review_uncertain=bool(payload.get("review_uncertain", True)),
                 )
@@ -524,6 +544,10 @@ def run_job(job: OrganizeJob) -> None:
             use_ai=job.use_ai,
             ai_model=job.ai_model,
             ai_labels=job.ai_labels,
+            corrections_path=job.corrections_path,
+            ai_flip_binary_labels=job.ai_flip_binary_labels,
+            ai_debug_outputs=job.ai_debug_outputs,
+            force_review_on_suspicious_sfw=job.force_review_on_suspicious_sfw,
             confidence_threshold=job.confidence_threshold,
             review_uncertain=job.review_uncertain,
         )

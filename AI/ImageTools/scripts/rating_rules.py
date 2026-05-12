@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -45,6 +45,7 @@ class RatingDecision:
     confidence: float
     matched_rules: list[str]
     reason: str
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 def tokenize(value: str) -> list[str]:
@@ -153,9 +154,27 @@ def combine_decisions(
     for decision in candidates:
         matched_rules.extend(decision.matched_rules)
 
+    adult_ai_categories = {"Suggestive", "Lingerie", "Partial_Nude", "Nude", "Explicit"}
+
+    # A high-confidence local AI adult result should not be downgraded just
+    # because the lightweight color heuristic asks for review. The visual
+    # heuristic is intentionally cautious, but it is weaker than an explicit
+    # model result when the model maps into an adult organizer category.
+    if (
+        ai_decision
+        and ai_decision.category in adult_ai_categories
+        and ai_decision.confidence >= confidence_threshold
+    ):
+        combined = RatingDecision(
+            ai_decision.category,
+            ai_decision.confidence,
+            matched_rules + ["ai_adult_result_overrode_visual_review"],
+            ai_decision.reason,
+            ai_decision.metadata,
+        )
     # Visual review warnings override SFW-style filename guesses. This keeps the
     # tool from blindly trusting filenames when the image signal is unclear.
-    if visual.category == "Review_Needed" and keyword.category in {"SFW", "Unknown", "Suggestive"}:
+    elif visual.category == "Review_Needed" and keyword.category in {"SFW", "Unknown", "Suggestive"}:
         combined = RatingDecision(
             "Review_Needed",
             min(visual.confidence, 0.6),
@@ -163,7 +182,13 @@ def combine_decisions(
             f"visual_uncertain_overrode_keyword:{keyword.category}",
         )
     elif ai_decision and ai_decision.confidence >= max(keyword.confidence, visual.confidence):
-        combined = RatingDecision(ai_decision.category, ai_decision.confidence, matched_rules, ai_decision.reason)
+        combined = RatingDecision(
+            ai_decision.category,
+            ai_decision.confidence,
+            matched_rules,
+            ai_decision.reason,
+            ai_decision.metadata,
+        )
     elif visual.confidence > keyword.confidence + 0.12:
         combined = RatingDecision(visual.category, visual.confidence, matched_rules, visual.reason)
     else:

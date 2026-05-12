@@ -19,6 +19,8 @@ class AIConfig:
     model_path: Path | None = None
     labels_path: Path | None = None
     input_size: int = 224
+    flip_binary_labels: bool = False
+    debug_outputs: bool = False
 
 
 class LocalAIClassifier:
@@ -40,6 +42,15 @@ class LocalAIClassifier:
         "nudity": "Nude",
         "explicit": "Explicit",
         "nsfw": "Explicit",
+        "hentai": "Explicit",
+        "hential": "Explicit",
+        "porn": "Explicit",
+        "sexy": "Suggestive",
+        "neutral": "SFW",
+        "drawings": "Review_Needed",
+        "drawing": "Review_Needed",
+        "illustration": "Review_Needed",
+        "illustrated": "Review_Needed",
         "unknown": "Unknown",
         "review_needed": "Review_Needed",
         "review needed": "Review_Needed",
@@ -52,7 +63,10 @@ class LocalAIClassifier:
         self.config = config or AIConfig()
         self.session = None
         self.labels: list[str] = []
+        self.label_mapping: dict[str, str] = {}
         self.input_name: str | None = None
+        self.input_shapes: list[dict[str, object]] = []
+        self.output_shapes: list[dict[str, object]] = []
 
         if not enabled:
             return
@@ -77,9 +91,11 @@ class LocalAIClassifier:
             labels_payload = json.loads(self.config.labels_path.read_text(encoding="utf-8"))
             if isinstance(labels_payload, dict):
                 ordered = sorted(labels_payload.items(), key=lambda item: int(item[0]))
+                self.label_mapping = {str(index): str(label) for index, label in ordered}
                 self.labels = [str(label) for _, label in ordered]
             elif isinstance(labels_payload, list):
                 self.labels = [str(label) for label in labels_payload]
+                self.label_mapping = {str(index): str(label) for index, label in enumerate(self.labels)}
             else:
                 self.reason = "AI labels JSON must be a list or an index-to-label object"
                 return
@@ -97,7 +113,11 @@ class LocalAIClassifier:
                 sess_options=options,
                 providers=["CPUExecutionProvider"],
             )
-            self.input_name = self.session.get_inputs()[0].name
+            inputs = self.session.get_inputs()
+            outputs = self.session.get_outputs()
+            self.input_name = inputs[0].name
+            self.input_shapes = [{"name": item.name, "shape": list(item.shape)} for item in inputs]
+            self.output_shapes = [{"name": item.name, "shape": list(item.shape)} for item in outputs]
         except Exception as error:
             self.reason = f"Local AI model could not be loaded: {error}"
             return
@@ -119,19 +139,70 @@ class LocalAIClassifier:
                 array = np.transpose(array, (2, 0, 1))[None, :, :, :]
 
             outputs = self.session.run(None, {self.input_name: array})
-            scores = np.asarray(outputs[0]).reshape(-1)
-            scores = scores - scores.max()
-            probabilities = np.exp(scores) / np.exp(scores).sum()
+            raw_scores = np.asarray(outputs[0]).reshape(-1)
+            stable_scores = raw_scores - raw_scores.max()
+            probabilities = np.exp(stable_scores) / np.exp(stable_scores).sum()
             index = int(probabilities.argmax())
+            flip_applied = self.config.flip_binary_labels and len(probabilities) == 2
+            selected_index = 1 - index if flip_applied else index
             confidence = float(probabilities[index])
-            raw_label = self.labels[index] if index < len(self.labels) else "Unknown"
+            raw_label = self.labels[selected_index] if selected_index < len(self.labels) else "Unknown"
             category = self.LABEL_TO_CATEGORY.get(raw_label.strip().lower(), "Unknown")
         except Exception as error:
             return RatingDecision("Review_Needed", 0.35, ["ai_inference_error"], f"local_ai_error:{error}")
 
+        adult_labels = {"nsfw", "nude", "nudity", "explicit", "partial_nude", "partial nude"}
+        label_values = [label.strip().lower() for label in self.labels]
+        output_count = int(len(probabilities))
+        label_count_matches_output = len(self.labels) == output_count
+        label_count_warning = None
+        if not label_count_matches_output:
+            label_count_warning = f"label_count:{len(self.labels)} output_count:{output_count}"
+        labels_may_be_reversed = (
+            len(label_values) == 2
+            and label_values[0] in adult_labels
+            and label_values[1] in {"sfw", "safe"}
+        )
+        suspicious_high_sfw = (
+            category == "SFW"
+            and confidence >= 0.9
+            and signals.skin_like_ratio is not None
+            and signals.skin_like_ratio >= 0.16
+        )
+        if suspicious_high_sfw:
+            labels_may_be_reversed = True
+
+        metadata = {
+            "ai_raw_outputs": raw_scores.astype(float).round(6).tolist() if self.config.debug_outputs else None,
+            "ai_probabilities": probabilities.astype(float).round(6).tolist() if self.config.debug_outputs else None,
+            "ai_selected_index": selected_index,
+            "ai_original_selected_index": index,
+            "ai_selected_label": raw_label,
+            "ai_label_mapping": self.label_mapping,
+            "ai_model_input_shape": self.input_shapes,
+            "ai_model_output_shape": self.output_shapes,
+            "ai_actual_output_shape": [list(np.asarray(output).shape) for output in outputs],
+            "ai_preprocessing_mode": f"rgb_resize_{self.config.input_size}_chw_float32_0_1",
+            "ai_flip_binary_labels": flip_applied,
+            "ai_flip_binary_labels_requested": self.config.flip_binary_labels,
+            "ai_labels_may_be_reversed": labels_may_be_reversed,
+            "ai_label_count_matches_output": label_count_matches_output,
+            "ai_label_count_warning": label_count_warning,
+        }
+        matched = [f"ai_label:{raw_label}", f"ai_confidence:{confidence:.3f}", "ai_provider:cpu_onnx"]
+        if self.config.flip_binary_labels and len(probabilities) == 2:
+            matched.append("ai_flip_binary_labels")
+        elif self.config.flip_binary_labels:
+            matched.append(f"ai_flip_binary_labels_ignored_for_output_count:{len(probabilities)}")
+        if labels_may_be_reversed:
+            matched.append("ai_labels_may_be_reversed")
+        if label_count_warning:
+            matched.append(f"ai_label_count_warning:{label_count_warning}")
+
         return RatingDecision(
             category,
             confidence,
-            [f"ai_label:{raw_label}", f"ai_confidence:{confidence:.3f}", "ai_provider:cpu_onnx"],
+            matched,
             "local_cpu_ai_classifier",
+            metadata,
         )

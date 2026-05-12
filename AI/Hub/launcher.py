@@ -14,8 +14,20 @@ SCRIPTS = IMAGE_TOOLS / "scripts"
 CONFIG = IMAGE_TOOLS / "Configs/default_config.json"
 LOGS = IMAGE_TOOLS / "Logs"
 MODELS = IMAGE_TOOLS / "models"
-MODEL_FILE = MODELS / "model_q4f16.onnx"
-LABELS_FILE = MODELS / "rating_labels.json"
+TRAINING = IMAGE_TOOLS / "Training"
+MODEL_FILE = MODELS / "model_quantized.onnx"
+LABELS_FILE = MODELS / "rating_labels.quantized.json"
+CORRECTIONS_FILE = TRAINING / "corrections.json"
+RATING_LABELS = (
+    "SFW",
+    "Suggestive",
+    "Lingerie",
+    "Partial_Nude",
+    "Nude",
+    "Explicit",
+    "Unknown",
+    "Review_Needed",
+)
 
 
 def print_header() -> None:
@@ -100,16 +112,57 @@ def show_model_folder() -> None:
     print("AI/ImageTools/models/")
     print("")
     print("Expected ONNX model file:")
-    print("AI/ImageTools/models/model_q4f16.onnx")
+    print("AI/ImageTools/models/model_quantized.onnx")
     print("")
     print("Expected labels file:")
-    print("AI/ImageTools/models/rating_labels.json")
+    print("AI/ImageTools/models/rating_labels.quantized.json")
     print("")
     print(f"Full folder path: {MODELS}")
     print(f"Full model path: {MODEL_FILE}")
     print(f"Full labels path: {LABELS_FILE}")
     print("")
     print("AI mode is optional and disabled by default. The organizer works without these files.")
+
+
+def add_manual_correction() -> None:
+    print("")
+    print("Add ImageTools Manual Correction")
+    print("--------------------------------")
+    print("This records a local JSON override. It does not edit, move, or delete the image.")
+    print("")
+    image_path = input("Image path: ").strip().strip('"')
+    if not image_path:
+        print("Canceled: image path is required.")
+        return
+
+    print("")
+    print("Valid labels:")
+    for label in RATING_LABELS:
+        print(f"- {label}")
+    print("")
+    label = input("Correct label: ").strip()
+    if label not in RATING_LABELS:
+        print(f"Canceled: '{label}' is not a valid label.")
+        return
+
+    previous_label = input("Previous label, if known: ").strip()
+    notes = input("Notes: ").strip()
+    run_command(
+        [
+            sys.executable,
+            str(SCRIPTS / "add_correction.py"),
+            "--image",
+            image_path,
+            "--label",
+            label,
+            "--previous-label",
+            previous_label,
+            "--notes",
+            notes,
+            "--corrections",
+            str(CORRECTIONS_FILE),
+        ]
+    )
 
 
 def menu() -> None:
@@ -121,7 +174,8 @@ def menu() -> None:
         print("4. Check ImageTools requirements")
         print("5. Open ImageTools GUI if available")
         print("6. Show ONNX model folder path")
-        print("7. Exit")
+        print("7. Add ImageTools manual correction")
+        print("8. Exit")
         print("")
         choice = input("Choose an option, or press Enter for dry run: ").strip() or "1"
 
@@ -138,10 +192,12 @@ def menu() -> None:
         elif choice == "6":
             show_model_folder()
         elif choice == "7":
+            add_manual_correction()
+        elif choice == "8":
             print("Exiting AI Tools Hub.")
             return
         else:
-            print("Unknown option. Choose 1 through 7.")
+            print("Unknown option. Choose 1 through 8.")
 
         input("\nPress Enter to return to the hub menu...")
 

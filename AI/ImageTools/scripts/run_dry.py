@@ -35,6 +35,7 @@ def main() -> int:
     log_dir = repo_path(str(config.get("log_dir", "AI/ImageTools/Logs")), DEFAULT_LOG_DIR)
     ai_model = repo_path(str(config.get("ai_model", "")), PROJECT_DIR / "models/rating_model.onnx")
     ai_labels = repo_path(str(config.get("ai_labels", "")), PROJECT_DIR / "models/rating_labels.json")
+    corrections = repo_path(str(config.get("corrections", "AI/ImageTools/Training/corrections.json")), PROJECT_DIR / "Training/corrections.json")
 
     print("ImageTools dry-run")
     print(f"Source: {source}")
@@ -54,6 +55,12 @@ def main() -> int:
         use_ai=bool(config.get("use_ai", False)),
         ai_model=ai_model,
         ai_labels=ai_labels,
+        ai_flip_binary_labels=bool(config.get("ai_flip_binary_labels", False)),
+        ai_debug_outputs=bool(config.get("ai_debug_outputs", True)),
+        force_review_on_suspicious_sfw=bool(config.get("force_review_on_suspicious_sfw", True)),
+        suspicious_skin_ratio_threshold=float(config.get("suspicious_skin_ratio_threshold", 0.16)),
+        suspicious_bright_ratio_threshold=float(config.get("suspicious_bright_ratio_threshold", 0.45)),
+        corrections_path=corrections,
         log_dir=log_dir,
         debug=bool(config.get("debug", True)),
     )

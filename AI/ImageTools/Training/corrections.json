@@ -1,0 +1,44 @@
+{
+  "corrections": [
+    {
+      "sha256": "20434b259700220b01f8d552ede6da3d47b63d03ff60d44677c1519339fb71a2",
+      "filename": "An_anthropomorphic_German_Shep (2).jpeg",
+      "correct_label": "Lingerie",
+      "previous_label": "SFW",
+      "notes": "",
+      "created_at": "2026-05-12T05:11:17+00:00"
+    },
+    {
+      "sha256": "1d0e499bbfde87686a80371e1585f9a6266d7c55f62523ea47c81c9a16d6f924",
+      "filename": "An_anthropomorphic_German_Shep (3).jpeg",
+      "correct_label": "Partial_Nude",
+      "previous_label": "SFW",
+      "notes": "",
+      "created_at": "2026-05-12T05:13:53+00:00"
+    },
+    {
+      "sha256": "7dceb53785e1ccc20213134ef83cb3d8d12461d75adbee5b340e29143d9c2bba",
+      "filename": "An_anthropomorphic_German_Shep (4).jpeg",
+      "correct_label": "Nude",
+      "previous_label": "Review_Needed",
+      "notes": "",
+      "created_at": "2026-05-12T05:19:03+00:00"
+    },
+    {
+      "sha256": "8f5391c2ff42bee89b0b1701e27b907e93b4709273a5aaf937f75b61923b61e6",
+      "filename": "An_anthropomorphic_German_Shep (1).jpeg",
+      "correct_label": "SFW",
+      "previous_label": "Review_Needed",
+      "notes": "",
+      "created_at": "2026-05-12T05:20:41+00:00"
+    },
+    {
+      "sha256": "fa931971b4993de4221f4384e57ff535618705c6bd7c4dd503b4003c87f849aa",
+      "filename": "An_anthropomorphic_German_Shep (5).jpeg",
+      "correct_label": "Partial_Nude",
+      "previous_label": "Review_Needed",
+      "notes": "",
+      "created_at": "2026-05-12T05:24:02+00:00"
+    }
+  ]
+}

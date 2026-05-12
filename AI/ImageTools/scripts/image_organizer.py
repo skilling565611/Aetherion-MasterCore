@@ -11,14 +11,18 @@ from pathlib import Path
 from typing import Iterator
 
 from light_ai_classifier import AIConfig, LocalAIClassifier
+from manual_corrections import find_manual_correction, load_corrections
 from rating_rules import (
     RATING_CATEGORIES,
     SUPPORTED_EXTENSIONS,
     VisualSignals,
     combine_decisions,
     detect_character,
+    filename_context,
     keyword_rating,
+    LINGERIE_KEYWORDS,
     safe_name,
+    SFW_KEYWORDS,
     visual_rating,
 )
 from reporting import ReportWriter, utc_now
@@ -30,8 +34,9 @@ DEFAULT_OUTPUT_ROOT = REPO_ROOT / "AI/Perchance/IMG"
 DEFAULT_CHARACTER = "Nyra_Vale"
 DEFAULT_LOG_DIR = REPO_ROOT / "AI/ImageTools/Logs"
 DEFAULT_CONFIG_PATH = REPO_ROOT / "AI/ImageTools/Configs/default_config.json"
-DEFAULT_AI_MODEL = REPO_ROOT / "AI/ImageTools/models/model_q4f16.onnx"
-DEFAULT_AI_LABELS = REPO_ROOT / "AI/ImageTools/models/rating_labels.json"
+DEFAULT_AI_MODEL = REPO_ROOT / "AI/ImageTools/models/model_quantized.onnx"
+DEFAULT_AI_LABELS = REPO_ROOT / "AI/ImageTools/models/rating_labels.quantized.json"
+DEFAULT_CORRECTIONS = REPO_ROOT / "AI/ImageTools/Training/corrections.json"
 
 
 @dataclass(frozen=True)
@@ -199,6 +204,65 @@ def scan_report_entry(meta: ImageMeta, signals: VisualSignals) -> dict[str, obje
     }
 
 
+def ai_log_metadata(ai_decision: object | None) -> dict[str, object]:
+    """Return stable AI debug fields for every decision log entry."""
+
+    empty = {
+        "ai_raw_outputs": None,
+        "ai_probabilities": None,
+        "ai_selected_index": None,
+        "ai_selected_label": None,
+        "ai_label_mapping": None,
+        "ai_model_input_shape": None,
+        "ai_model_output_shape": None,
+        "ai_preprocessing_mode": None,
+    }
+    metadata = getattr(ai_decision, "metadata", None)
+    if not isinstance(metadata, dict):
+        return empty
+
+    return {
+        "ai_raw_outputs": metadata.get("ai_raw_outputs"),
+        "ai_probabilities": metadata.get("ai_probabilities"),
+        "ai_selected_index": metadata.get("ai_selected_index"),
+        "ai_selected_label": metadata.get("ai_selected_label"),
+        "ai_label_mapping": metadata.get("ai_label_mapping"),
+        "ai_model_input_shape": metadata.get("ai_model_input_shape"),
+        "ai_model_output_shape": metadata.get("ai_model_output_shape"),
+        "ai_preprocessing_mode": metadata.get("ai_preprocessing_mode"),
+        "ai_original_selected_index": metadata.get("ai_original_selected_index"),
+        "ai_actual_output_shape": metadata.get("ai_actual_output_shape"),
+        "ai_flip_binary_labels": metadata.get("ai_flip_binary_labels"),
+        "ai_flip_binary_labels_requested": metadata.get("ai_flip_binary_labels_requested"),
+        "ai_labels_may_be_reversed": metadata.get("ai_labels_may_be_reversed"),
+        "ai_label_count_matches_output": metadata.get("ai_label_count_matches_output"),
+        "ai_label_count_warning": metadata.get("ai_label_count_warning"),
+    }
+
+
+def is_suspicious_sfw_ai_result(
+    path: Path,
+    signals: VisualSignals,
+    skin_threshold: float,
+    bright_threshold: float,
+) -> bool:
+    """Detect cases where a high-confidence SFW AI result should be reviewed.
+
+    This is deliberately conservative. It does not decide NSFW by itself; it
+    only prevents an AI SFW result from overriding visual uncertainty when the
+    filename does not provide clothing/safe context.
+    """
+
+    tokens = filename_context(path)
+    clothing_or_safe_keywords = SFW_KEYWORDS | LINGERIE_KEYWORDS
+    if tokens & clothing_or_safe_keywords:
+        return False
+
+    skin = signals.skin_like_ratio or 0.0
+    bright = signals.bright_ratio or 0.0
+    return skin >= skin_threshold or bright >= bright_threshold
+
+
 def resolve_config_path(value: str | Path | None) -> Path | None:
     """Resolve user-friendly config paths from the repository root.
 
@@ -260,6 +324,12 @@ def organize_images(
     use_ai: bool = False,
     ai_model: Path | None = None,
     ai_labels: Path | None = None,
+    ai_flip_binary_labels: bool = False,
+    ai_debug_outputs: bool = False,
+    force_review_on_suspicious_sfw: bool = True,
+    suspicious_skin_ratio_threshold: float = 0.16,
+    suspicious_bright_ratio_threshold: float = 0.45,
+    corrections_path: Path | None = DEFAULT_CORRECTIONS,
     log_dir: Path = DEFAULT_LOG_DIR,
     rename: bool = True,
     known_characters: list[str] | None = None,
@@ -271,11 +341,17 @@ def organize_images(
     reports = ReportWriter(log_dir)
     ai_classifier = LocalAIClassifier(
         enabled=use_ai,
-        config=AIConfig(model_path=ai_model, labels_path=ai_labels),
+        config=AIConfig(
+            model_path=ai_model,
+            labels_path=ai_labels,
+            flip_binary_labels=ai_flip_binary_labels,
+            debug_outputs=ai_debug_outputs,
+        ),
     )
     first_hash_path: dict[str, Path] = {}
     results: list[OrganizeResult] = []
     warned_pillow = False
+    corrections = load_corrections(corrections_path)
 
     if use_ai and debug:
         print(f"DEBUG ai: {ai_classifier.reason}")
@@ -304,6 +380,55 @@ def organize_images(
             confidence_threshold=confidence_threshold,
             review_uncertain=review_uncertain,
         )
+        automated_decision = decision
+        suspicious_sfw_override_applied = False
+        if (
+            force_review_on_suspicious_sfw
+            and ai_decision is not None
+            and ai_decision.category == "SFW"
+            and decision.category == "SFW"
+            and is_suspicious_sfw_ai_result(
+                path=path,
+                signals=signals,
+                skin_threshold=suspicious_skin_ratio_threshold,
+                bright_threshold=suspicious_bright_ratio_threshold,
+            )
+        ):
+            suspicious_sfw_override_applied = True
+            decision = type(decision)(
+                "Review_Needed",
+                min(decision.confidence, ai_decision.confidence),
+                decision.matched_rules + [
+                    "suspicious_sfw_ai_result",
+                    f"suspicious_skin_threshold:{suspicious_skin_ratio_threshold:.3f}",
+                    f"suspicious_bright_threshold:{suspicious_bright_ratio_threshold:.3f}",
+                ],
+                "suspicious_sfw_ai_result",
+                decision.metadata,
+            )
+            automated_decision = decision
+        manual_correction = find_manual_correction(corrections, meta.sha256, path.name)
+        manual_correction_applied = manual_correction is not None
+        manual_correct_label = manual_correction.correct_label if manual_correction else None
+        manual_correction_reason = manual_correction.reason if manual_correction else None
+        manual_previous_label = None
+        manual_correction_notes = None
+        manual_correction_created_at = None
+        if manual_correction is not None:
+            manual_previous_label = manual_correction.entry.get("previous_label") or automated_decision.category
+            manual_correction_notes = manual_correction.entry.get("notes")
+            manual_correction_created_at = manual_correction.entry.get("created_at")
+            decision = type(decision)(
+                manual_correction.correct_label,
+                1.0,
+                decision.matched_rules
+                + [
+                    f"manual_correction:{manual_correction.reason}",
+                    f"manual_correction_overrode:{automated_decision.category}",
+                ],
+                f"manual_correction:{manual_correction.reason}",
+                decision.metadata,
+            )
 
         target_dir = output_root / safe_name(detected_character) / safe_name(decision.category)
         target_name = clean_filename(path, detected_character, decision.category, meta.sha256, rename=rename)
@@ -341,7 +466,18 @@ def organize_images(
             "duplicate_status": duplicate_status,
             "dry_run": dry_run,
             "ai_status": ai_classifier.reason if use_ai else "AI mode disabled",
+            "suspicious_sfw_override_applied": suspicious_sfw_override_applied,
+            "manual_correction_applied": manual_correction_applied,
+            "manual_correct_label": manual_correct_label,
+            "manual_correction_reason": manual_correction_reason,
+            "manual_previous_label": manual_previous_label,
+            "manual_correction_notes": manual_correction_notes,
+            "manual_correction_created_at": manual_correction_created_at,
+            "automated_rating_category": automated_decision.category,
+            "automated_confidence": automated_decision.confidence,
+            "automated_reason": automated_decision.reason,
         }
+        log_entry.update(ai_log_metadata(ai_decision))
         reports.add_decision(log_entry)
 
         result = OrganizeResult(
@@ -389,6 +525,7 @@ def parse_args() -> argparse.Namespace:
     log_dir_default = resolve_repo_path(config.get("log_dir")) or DEFAULT_LOG_DIR
     ai_model_default = resolve_repo_path(config.get("ai_model")) or DEFAULT_AI_MODEL
     ai_labels_default = resolve_repo_path(config.get("ai_labels")) or DEFAULT_AI_LABELS
+    corrections_default = resolve_repo_path(config.get("corrections")) or DEFAULT_CORRECTIONS
 
     parser = argparse.ArgumentParser(
         description="Lightweight local image rating organizer for Aetherion character assets.",
@@ -403,9 +540,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--use-ai", action="store_true", default=config_bool(config, "use_ai", False), help="Enable optional local AI hook when dependencies/model are installed.")
     parser.add_argument("--ai-model", type=Path, default=ai_model_default, help="Optional local ONNX model path for --use-ai.")
     parser.add_argument("--ai-labels", type=Path, default=ai_labels_default, help="Optional JSON labels file for --use-ai.")
+    parser.add_argument("--corrections", type=Path, default=corrections_default, help="Manual corrections JSON path.")
+    parser.add_argument("--ai-flip-binary-labels", action="store_true", default=config_bool(config, "ai_flip_binary_labels", False), help="Flip two-class SFW/NSFW label order after model inference.")
+    parser.add_argument("--ai-debug-outputs", action="store_true", default=config_bool(config, "ai_debug_outputs", False), help="Include raw ONNX debug outputs in logs.")
+    parser.add_argument("--force-review-on-suspicious-sfw", action=argparse.BooleanOptionalAction, default=config_bool(config, "force_review_on_suspicious_sfw", True), help="Force Review_Needed when AI says SFW but visual signals look suspicious.")
     parser.add_argument("--dry-run", action="store_true", default=config_bool(config, "dry_run", False), help="Preview decisions without copying files.")
     parser.add_argument("--copy-only", action="store_true", default=config_bool(config, "copy_only", True), help="Safety flag; copy-only is always enforced.")
     parser.add_argument("--confidence-threshold", type=float, default=float(config.get("confidence_threshold", 0.70)), help="Review threshold. Default: 0.70")
+    parser.add_argument("--suspicious-skin-ratio-threshold", type=float, default=float(config.get("suspicious_skin_ratio_threshold", 0.16)), help="Skin-like ratio threshold for suspicious SFW override.")
+    parser.add_argument("--suspicious-bright-ratio-threshold", type=float, default=float(config.get("suspicious_bright_ratio_threshold", 0.45)), help="Bright ratio threshold for suspicious SFW override.")
     parser.add_argument("--review-uncertain", action=argparse.BooleanOptionalAction, default=config_bool(config, "review_uncertain", True), help="Send low-confidence images to Review_Needed.")
     parser.add_argument("--log-dir", type=Path, default=log_dir_default, help=f"JSON log folder. Default: {DEFAULT_LOG_DIR}")
     parser.add_argument("--no-rename", action="store_true", default=not config_bool(config, "rename", True), help="Keep original filename except when duplicate-safe suffixes are needed.")
@@ -437,6 +580,12 @@ def main() -> int:
         use_ai=args.use_ai,
         ai_model=args.ai_model,
         ai_labels=args.ai_labels,
+        ai_flip_binary_labels=args.ai_flip_binary_labels,
+        ai_debug_outputs=args.ai_debug_outputs,
+        force_review_on_suspicious_sfw=args.force_review_on_suspicious_sfw,
+        suspicious_skin_ratio_threshold=args.suspicious_skin_ratio_threshold,
+        suspicious_bright_ratio_threshold=args.suspicious_bright_ratio_threshold,
+        corrections_path=args.corrections,
         log_dir=args.log_dir,
         rename=not args.no_rename,
         known_characters=args.known_character,

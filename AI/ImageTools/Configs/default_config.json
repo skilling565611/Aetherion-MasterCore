@@ -9,6 +9,12 @@
   "review_uncertain": true,
   "recursive": true,
   "debug": true,
-  "ai_model": "AI/ImageTools/models/model_q4f16.onnx",
-  "ai_labels": "AI/ImageTools/models/rating_labels.json"
+  "ai_model": "AI/ImageTools/models/model_quantized.onnx",
+  "ai_labels": "AI/ImageTools/models/rating_labels.quantized.json",
+  "corrections": "AI/ImageTools/Training/corrections.json",
+  "ai_flip_binary_labels": false,
+  "ai_debug_outputs": true,
+  "force_review_on_suspicious_sfw": true,
+  "suspicious_skin_ratio_threshold": 0.16,
+  "suspicious_bright_ratio_threshold": 0.45
 }

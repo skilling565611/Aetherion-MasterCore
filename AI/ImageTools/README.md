@@ -142,11 +142,59 @@ python AI/ImageTools/scripts/image_organizer.py `
   --output "AI/Perchance/IMG" `
   --character "Nyra_Vale" `
   --use-ai `
-  --ai-model "AI/ImageTools/models/rating_model.onnx" `
-  --ai-labels "AI/ImageTools/models/rating_labels.json"
+  --ai-model "AI/ImageTools/models/model_quantized.onnx" `
+  --ai-labels "AI/ImageTools/models/rating_labels.quantized.json"
 ```
 
+AI debug and safety switches:
+
+```powershell
+python AI/ImageTools/scripts/image_organizer.py `
+  --config AI/ImageTools/Configs/default_config.json `
+  --use-ai `
+  --ai-debug-outputs `
+  --force-review-on-suspicious-sfw
+```
+
+Use `--ai-flip-binary-labels` only for a two-class model when the SFW/NSFW labels are known to be reversed.
+
 AI mode is optional. If AI dependencies or a local model are missing, the tool continues with keyword rules and Pillow heuristics and records the AI status in the JSON decision log. ONNX inference is forced to `CPUExecutionProvider` with one worker thread so it remains appropriate for Arctic Prime-style low-power hardware.
+
+AI decision logs include raw ONNX outputs, softmax probabilities, model input/output tensor names and shapes, selected class index, selected label, and the loaded label mapping when `ai_debug_outputs` is enabled. If AI reports `SFW` but visual signals look suspicious and the filename has no clothing or safe keyword, `force_review_on_suspicious_sfw` sends the image to `Review_Needed` with reason `suspicious_sfw_ai_result`.
+
+## Manual Corrections
+
+Manual corrections let you teach ImageTools the correct label without retraining the ONNX model. This is lightweight, local, and better suited for Arctic Prime than model training.
+
+Corrections live here:
+
+```text
+AI/ImageTools/Training/corrections.json
+```
+
+Add or update a correction:
+
+```powershell
+python AI/ImageTools/scripts/add_correction.py `
+  --image "AI/PIX/example.jpeg" `
+  --label "Explicit" `
+  --previous-label "SFW" `
+  --notes "wrong AI label"
+```
+
+Corrections match by SHA256 first. Filename matching is fallback only. A manual correction overrides AI, filename rules, and visual rules, and the decision log records:
+
+```text
+manual_correction_applied
+manual_correct_label
+manual_correction_reason
+manual_previous_label
+automated_rating_category
+automated_confidence
+automated_reason
+```
+
+This does not delete, move, or modify originals. Real retraining can be added later on Control Prime.
 
 ## Local AI Model Folder
 
@@ -159,22 +207,24 @@ AI/ImageTools/models/
 Current ONNX model path in `Configs/default_config.json`:
 
 ```text
-AI/ImageTools/models/model_q4f16.onnx
+AI/ImageTools/models/model_quantized.onnx
 ```
 
-Expected labels file:
+Expected labels file for the quantized model:
 
 ```text
-AI/ImageTools/models/rating_labels.json
+AI/ImageTools/models/rating_labels.quantized.json
 ```
 
-An example labels file is included:
+The quantized model outputs 5 logits. Its labels intentionally map index `0` to `Review_Needed`, not `SFW`, because illustrated/anthro images have been selected at index `0` during testing.
+
+An 8-category example labels file is also included:
 
 ```text
 AI/ImageTools/models/rating_labels.example.json
 ```
 
-AI mode is optional and disabled by default in `Configs/default_config.json`. ImageTools still runs without `rating_model.onnx` or `rating_labels.json`; it falls back to filename rules and Pillow-based local analysis.
+AI mode is optional and disabled by default in `Configs/default_config.json`. ImageTools still runs without `model_quantized.onnx` or `rating_labels.quantized.json`; it falls back to filename rules and Pillow-based local analysis.
 
 Do not commit large model files unless intentionally needed. Actual `.onnx` files are ignored by the local ImageTools `.gitignore` so Arctic Prime can keep model files local.
 
