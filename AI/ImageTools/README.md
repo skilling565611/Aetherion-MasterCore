@@ -84,6 +84,20 @@ python AI/ImageTools/scripts/setup_env.py --install-project
 
 Use the PyInstaller build only on Control Prime. The EXE output is for testing on Arctic Prime without requiring Python to be installed there.
 
+Before build, copy, push, or pull work, run the read-only Git preflight check:
+
+```powershell
+python AI/ImageTools/scripts/preflight_check.py
+```
+
+Strict mode returns a non-zero exit code when Git lock files or unfinished Git operations are found:
+
+```powershell
+python AI/ImageTools/scripts/preflight_check.py --strict
+```
+
+The preflight check only reports. It does not kill processes, edit files, clean the repo, or fix Git state.
+
 Install the build requirement:
 
 ```powershell
