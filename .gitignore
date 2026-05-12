@@ -20,6 +20,10 @@ Desktop.ini
 # Common build output
 .gradle/
 build/
+!AI/ImageTools/Build/
+!AI/ImageTools/Build/build_exe.py
+!AI/ImageTools/Build/build_image_tools.bat
+!AI/ImageTools/Build/README.md
 dist/
 out/
 bin/

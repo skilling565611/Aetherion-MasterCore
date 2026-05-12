@@ -80,6 +80,30 @@ python AI/ImageTools/scripts/setup_env.py --install-project
 
 `setup_env.py` does not auto-install heavy AI packages. Arctic Prime should avoid `torch`, `transformers`, `tensorflow`, and similar heavy stacks by default.
 
+## Windows EXE Build
+
+Use the PyInstaller build only on Control Prime. The EXE output is for testing on Arctic Prime without requiring Python to be installed there.
+
+Install the build requirement:
+
+```powershell
+python -m pip install -r AI/ImageTools/Requirements/build.txt
+```
+
+Build the portable folder:
+
+```powershell
+python AI/ImageTools/Build/build_exe.py
+```
+
+The final folder is written to:
+
+```text
+AI/ImageTools/Build/Aetherion_ImageTools/
+```
+
+The EXE keeps configs, model files, corrections, training files, and logs external beside the EXE. ONNX model files and large datasets are not bundled. Real copy mode asks for confirmation, and the organizer remains copy-only.
+
 The default runner config lives here:
 
 ```text
@@ -216,7 +240,17 @@ Expected labels file for the quantized model:
 AI/ImageTools/models/rating_labels.quantized.json
 ```
 
-The quantized model outputs 5 logits. Its labels intentionally map index `0` to `Review_Needed`, not `SFW`, because illustrated/anthro images have been selected at index `0` during testing.
+The prithivMLmods/Vit-Mature-Content-Detection style 5-label mapping is:
+
+```text
+0 = Anime Picture -> SFW
+1 = Hentai -> Explicit
+2 = Neutral -> SFW
+3 = Pornography -> Explicit
+4 = Enticing or Sensual -> Suggestive
+```
+
+`Review_Needed` is never a direct model label. It is only a fallback when the layered organizer cannot make a safe final decision.
 
 An 8-category example labels file is also included:
 
@@ -241,12 +275,63 @@ Do not commit large model files unless intentionally needed. Actual `.onnx` file
 
 ## Decision Flow
 
-1. Filename and folder keyword rules.
-2. Basic Pillow analysis using tiny thumbnails and color ratios.
-3. Optional local AI classifier hook when enabled, installed, and configured with a local model.
-4. Low-confidence results fall back to `Review_Needed`.
+1. Manual correction by SHA256.
+2. Strong filename and folder rules.
+3. Optional general ONNX mature-content classifier when enabled, installed, and configured with a local model.
+4. Furry/anthro rule refinement.
+5. Low-confidence or unclear results fall back to `Review_Needed`.
 
 Visual uncertainty can override safe-looking filenames. The Pillow stage is intentionally conservative; it does not claim to detect nudity directly. SFW vs NSFW decisions follow the project rule: clothed, underwear, and lingerie images stay `SFW`, `Suggestive`, or `Lingerie` unless private body parts are clearly exposed; unclear images go to `Review_Needed`.
+
+Raw model labels are logged separately from final organizer labels. This keeps the ONNX output inspectable while allowing local rules and corrections to produce the final folder label.
+
+## Furry/Anthro Classifier Roadmap
+
+ImageTools now uses a layered classifier architecture for Aetherion character images:
+
+- Current system: general ONNX model + filename/folder rules + furry/anthro rules + manual corrections.
+- Manual corrections teach the organizer locally by SHA256 before any future model training exists.
+- Future training can use corrected examples from `AI/ImageTools/Training/corrections.json`.
+- Arctic Prime should use Lite mode: dry-run, copy-only, rules, corrections, and exported ONNX inference.
+- Control Prime should run Medium/Heavy testing and future training experiments.
+
+The furry/anthro layer is lightweight and rule-based. It checks filename/folder context for anthro/furry terms, ears, tails, fur/body clues, outfit and lingerie terms, exposed/nude terms, cyberpunk/neon style hints, and character hints such as `Nyra_Vale`.
+
+Decision logs include:
+
+```text
+furry_rules_applied
+furry_rule_score
+furry_detected
+outfit_hint
+exposure_hint
+species_hint
+character_hint
+final_layer_used
+raw_model_label
+raw_model_category
+final_organizer_label
+```
+
+Future custom classifier hooks are intentionally placeholders only. Do not train a model here yet, do not install `torch` by default, and do not commit large model files.
+
+## Future Training Data Pipeline
+
+Training data lives under:
+
+```text
+AI/ImageTools/Training/
+```
+
+The dataset builder reads `Training/corrections.json`, matches corrected images by SHA256, copies examples into `Training/Dataset/CATEGORY/`, and writes `dataset_manifest.json`. It never deletes originals, never moves originals, preserves original filenames in the manifest, and uses duplicate-safe copied names.
+
+Run it from the repository root:
+
+```powershell
+python AI/ImageTools/Training/dataset_builder.py
+```
+
+Training itself is not implemented yet. Later, Control Prime can train a custom Aetherion/furry/anthro-aware classifier and export it to ONNX. The packaged EXE should use that exported ONNX model rather than including heavy training dependencies.
 
 ## Outputs
 
@@ -254,14 +339,14 @@ Folder example:
 
 ```text
 AI/Perchance/IMG/Nyra_Vale/
-├── SFW/
-├── Suggestive/
-├── Lingerie/
-├── Partial_Nude/
-├── Nude/
-├── Explicit/
-├── Unknown/
-└── Review_Needed/
+|-- SFW/
+|-- Suggestive/
+|-- Lingerie/
+|-- Partial_Nude/
+|-- Nude/
+|-- Explicit/
+|-- Unknown/
+`-- Review_Needed/
 ```
 
 JSON logs are written to:

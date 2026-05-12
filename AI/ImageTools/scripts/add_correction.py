@@ -28,6 +28,13 @@ def hash_file(path: Path, chunk_size: int = 1024 * 256) -> str:
     return digest.hexdigest()
 
 
+def repo_display_path(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Add or update a manual ImageTools rating correction.")
     parser.add_argument("--image", required=True, type=Path, help="Image path to correct.")
@@ -51,6 +58,7 @@ def main() -> int:
     corrections = load_corrections(corrections_path)
     new_entry = {
         "sha256": sha256,
+        "original_path": repo_display_path(image_path),
         "filename": image_path.name,
         "correct_label": label,
         "previous_label": args.previous_label,

@@ -4,6 +4,17 @@ __pycache__/
 models/*.onnx
 Logs/*.json
 Logs/*.tmp
+Build/Aetherion_ImageTools/
+Build/PyInstallerDist/
+Build/PyInstallerWork/
+Build/*.spec
+Training/Dataset/**/*
+!Training/Dataset/**/
+!Training/Dataset/**/.gitkeep
+models/*.pt
+models/*.pth
+models/*.ckpt
+models/*.safetensors
 !models/README.md
 !models/put_onnx_models_here.txt
 !models/rating_labels.example.json

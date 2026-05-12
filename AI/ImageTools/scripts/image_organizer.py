@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Iterator
 
 from light_ai_classifier import AIConfig, LocalAIClassifier
+from furry_rules import detect_furry_rules, refine_with_furry_rules
 from manual_corrections import find_manual_correction, load_corrections
 from rating_rules import (
     RATING_CATEGORIES,
@@ -263,6 +264,19 @@ def is_suspicious_sfw_ai_result(
     return skin >= skin_threshold or bright >= bright_threshold
 
 
+def is_strong_filename_rule(decision: object) -> bool:
+    """Return true when filename/folder keywords should outrank weak signals."""
+
+    category = getattr(decision, "category", None)
+    confidence = float(getattr(decision, "confidence", 0.0))
+    reason = str(getattr(decision, "reason", ""))
+    return (
+        category in {"SFW", "Suggestive", "Lingerie", "Partial_Nude", "Nude", "Explicit"}
+        and confidence >= 0.72
+        and reason.startswith("filename_or_folder_matched_")
+    )
+
+
 def resolve_config_path(value: str | Path | None) -> Path | None:
     """Resolve user-friendly config paths from the repository root.
 
@@ -373,14 +387,19 @@ def organize_images(
         keyword_decision = keyword_rating(path)
         visual_decision = visual_rating(signals)
         ai_decision = ai_classifier.classify(path, signals) if use_ai else None
-        decision = combine_decisions(
-            keyword=keyword_decision,
-            visual=visual_decision,
-            ai_decision=ai_decision,
-            confidence_threshold=confidence_threshold,
-            review_uncertain=review_uncertain,
-        )
-        automated_decision = decision
+        furry_rules = detect_furry_rules(path, signals)
+        final_layer_used = "general_onnx_model" if ai_decision is not None else "filename_visual_rules"
+        if is_strong_filename_rule(keyword_decision):
+            decision = keyword_decision
+            final_layer_used = "strong_filename_folder_rules"
+        else:
+            decision = combine_decisions(
+                keyword=keyword_decision,
+                visual=visual_decision,
+                ai_decision=ai_decision,
+                confidence_threshold=confidence_threshold,
+                review_uncertain=review_uncertain,
+            )
         suspicious_sfw_override_applied = False
         if (
             force_review_on_suspicious_sfw
@@ -406,7 +425,14 @@ def organize_images(
                 "suspicious_sfw_ai_result",
                 decision.metadata,
             )
-            automated_decision = decision
+            final_layer_used = "review_needed_fallback"
+        refined_decision = refine_with_furry_rules(decision, furry_rules)
+        if refined_decision != decision:
+            decision = refined_decision
+            final_layer_used = "furry_anthro_rule_refinement"
+        if decision.category == "Review_Needed":
+            final_layer_used = "review_needed_fallback"
+        automated_decision = decision
         manual_correction = find_manual_correction(corrections, meta.sha256, path.name)
         manual_correction_applied = manual_correction is not None
         manual_correct_label = manual_correction.correct_label if manual_correction else None
@@ -429,6 +455,7 @@ def organize_images(
                 f"manual_correction:{manual_correction.reason}",
                 decision.metadata,
             )
+            final_layer_used = "manual_correction_sha256" if manual_correction.reason == "sha256_match" else "manual_correction_filename"
 
         target_dir = output_root / safe_name(detected_character) / safe_name(decision.category)
         target_name = clean_filename(path, detected_character, decision.category, meta.sha256, rename=rename)
@@ -476,7 +503,11 @@ def organize_images(
             "automated_rating_category": automated_decision.category,
             "automated_confidence": automated_decision.confidence,
             "automated_reason": automated_decision.reason,
+            "raw_model_label": getattr(ai_decision, "metadata", {}).get("ai_selected_label") if ai_decision else None,
+            "raw_model_category": ai_decision.category if ai_decision else None,
+            "final_organizer_label": decision.category,
         }
+        log_entry.update(furry_rules.log_fields(final_layer_used))
         log_entry.update(ai_log_metadata(ai_decision))
         reports.add_decision(log_entry)
 

@@ -32,8 +32,12 @@ class LocalAIClassifier:
     """
 
     LABEL_TO_CATEGORY = {
+        "anime picture": "SFW",
+        "anime_picture": "SFW",
         "sfw": "SFW",
         "safe": "SFW",
+        "enticing or sensual": "Suggestive",
+        "enticing_or_sensual": "Suggestive",
         "suggestive": "Suggestive",
         "lingerie": "Lingerie",
         "partial_nude": "Partial_Nude",
@@ -44,16 +48,15 @@ class LocalAIClassifier:
         "nsfw": "Explicit",
         "hentai": "Explicit",
         "hential": "Explicit",
+        "pornography": "Explicit",
         "porn": "Explicit",
         "sexy": "Suggestive",
         "neutral": "SFW",
-        "drawings": "Review_Needed",
-        "drawing": "Review_Needed",
-        "illustration": "Review_Needed",
-        "illustrated": "Review_Needed",
+        "drawings": "SFW",
+        "drawing": "SFW",
+        "illustration": "SFW",
+        "illustrated": "SFW",
         "unknown": "Unknown",
-        "review_needed": "Review_Needed",
-        "review needed": "Review_Needed",
     }
 
     def __init__(self, enabled: bool = False, config: AIConfig | None = None) -> None:
